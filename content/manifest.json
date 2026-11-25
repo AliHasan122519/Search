@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": 487,
- "updated": "2026-11-25T21:19:54Z",
+ "version": 489,
+ "updated": "2026-11-25T22:38:49Z",
  "tabs": [
   {
    "id": "assistant",
@@ -49,8 +49,8 @@
    "label": "كتب الفراسة",
    "kind": "generic",
    "file": "kutubfiras.json",
-   "sha256": "130bee73f7847a3c7650982f63ad20059455ddad565852bd120994c40da8fcb2",
-   "count": 27,
+   "sha256": "15bb6953ea03139fadf56639e63969d4f1ef91423560d0f488115b88c9ed77ac",
+   "count": 28,
    "drawer": true,
    "card": "library",
    "menu": "كتب الفراسة",
@@ -2715,6 +2715,346 @@
    "file": "scans/muraqiba-omran/302.jpg",
    "sha256": "a2343fcf5703ba8ac11fe3b2bcdad9470911b8752ac666a4fe78a4f746581e7f",
    "size": 48594
+  },
+  {
+   "file": "books/firasa-razi-hamdan.json",
+   "sha256": "59af11f09892025701d2cc6c2b3d0bcd58ff852981cca6b996ae686a333be048",
+   "size": 97633
+  },
+  {
+   "file": "covers/firasa-razi-hamdan.jpg",
+   "sha256": "649ea52a65fb20abd7f9e65cfc49e88edaa918b5965f67543efd12c80f52662d",
+   "size": 18872
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/000.jpg",
+   "sha256": "f103f6efc56a316317d359f348f36cc8d1c92385c143b4acef798162677f5cd8",
+   "size": 54842
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/001.jpg",
+   "sha256": "64b72f91c6a7b220fe52854ff9670e2830a6ac141cc91bf21689c1babadd6174",
+   "size": 23751
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/002.jpg",
+   "sha256": "47f5b30eb352ac457e7c90b13d43bfefb54a63b5f593805772f7144be1e5d6d5",
+   "size": 68753
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/003.jpg",
+   "sha256": "9e792dec0e7e6b7969a904ec3cd92fc22d70ddcb17475cdfba21ce18c8638c8c",
+   "size": 137523
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/004.jpg",
+   "sha256": "4858d06f6d57e8fa77053ec94578ae5478a555f8e32d1dfc5747a1052f7f0ade",
+   "size": 127671
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/005.jpg",
+   "sha256": "86b3321afdecb399ae73c19dcbe6c79f53261c67ee01d54f53420c4bae257b52",
+   "size": 87741
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/006.jpg",
+   "sha256": "6548f118a56028ee5f3fe8567b6f550868112e8388121935faf961ae72ab2f9a",
+   "size": 48819
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/007.jpg",
+   "sha256": "9d6e5adeae9ee1d8b38e4189b7e30b6a9d48da381609b9b3ce6e6069fa78fb92",
+   "size": 152925
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/008.jpg",
+   "sha256": "791678785812aa45d3d11d017bbaa34e97b8746babf6dadddf548a6597f366b8",
+   "size": 160532
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/009.jpg",
+   "sha256": "2dc92ba5a8b23e13a2ea19b47dc95935d4b25f016b2b23b9aea3fa2bc87c0c98",
+   "size": 166718
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/010.jpg",
+   "sha256": "3989d0536493ec18533dd16281c74e1640b8109edc3c6037590cba4f346ad441",
+   "size": 55204
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/011.jpg",
+   "sha256": "d0fbaa2618ecb921cb659fddad172cb2abdfcadfe21aeb515c3a6b6432ef5489",
+   "size": 179737
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/012.jpg",
+   "sha256": "0cc719c1f0b1fc087795be9908f48c8dc0ce321f37f8643ba061005b0789e997",
+   "size": 152039
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/013.jpg",
+   "sha256": "4c32b4982f328621e7f040c2937b79d3cceb44ae4a5c396ce561da6eb8b3a848",
+   "size": 198296
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/014.jpg",
+   "sha256": "d37021a1261501e5989887544d801bb469a949ca7c87cc2028ce22a3a3390b1a",
+   "size": 191721
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/015.jpg",
+   "sha256": "62346710423c4347edafc83a8744106b1476223de34c041220887e7712b5191e",
+   "size": 177403
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/016.jpg",
+   "sha256": "2754e8f827d069e6b1334d8685ba7993de80c8061bf13eb7bfcdc63bb0b974bf",
+   "size": 186912
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/017.jpg",
+   "sha256": "8fafb70d2311d344091d0e5e53d618d9f560201b711e0ff5f9d000de49f70a69",
+   "size": 172144
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/018.jpg",
+   "sha256": "d2eb97041e676f1982c48a79dceef584452adf5cef870cf7cd9e6eeb255818ac",
+   "size": 148921
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/019.jpg",
+   "sha256": "733437097616427c9267758297d51b0503cbccd2c16b5985039b20f42f8709f7",
+   "size": 112370
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/020.jpg",
+   "sha256": "303dad326c1f8012f8e0a63cad8d730934f242d4a4900076edfc28fb8bc4c46b",
+   "size": 150016
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/021.jpg",
+   "sha256": "de55200c3b3df1a5e3e0d669ab3f6adfcb8d16db14f4191b451ba9c7ed8af9f8",
+   "size": 199059
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/022.jpg",
+   "sha256": "b7cc9e07c34b7b05d98246fda140cbe1c29bcf5d6696a8e35c54d72dd6597550",
+   "size": 201246
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/023.jpg",
+   "sha256": "5e27d069dd4d637893a0ff951ec91dd6f667f3c4246a22c27f57235b21b04ccd",
+   "size": 192438
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/024.jpg",
+   "sha256": "96c53f79180299b5ecc1edfa9dda89f990f8f7f4d1f50bb64825217b8a42f47c",
+   "size": 145567
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/025.jpg",
+   "sha256": "7b0f17fd45ae0a33ce78250dba4f67ec0bfae6a51e4687a51ab52e892c97ed7e",
+   "size": 155954
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/026.jpg",
+   "sha256": "dd37c64e6906a48713b2d2ef78085b94fb1ff10a39cd94b6c9d8c8fc64131858",
+   "size": 88150
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/027.jpg",
+   "sha256": "e805f0759a298a2d736b9e1f55653a73544a579181c5534cd501f5d4fcf11712",
+   "size": 176885
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/028.jpg",
+   "sha256": "b22cb530a8d7ed717727f63ece03cefce34eadfa9c15b1444c495bb4cd8bb938",
+   "size": 173414
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/029.jpg",
+   "sha256": "ca4a0b511822ec11a4c216d6ed8dd86f94d04314a81e5b1ca2c853b77a6a80ac",
+   "size": 164979
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/030.jpg",
+   "sha256": "10960082251783121252f8b0c85c106fbc8946e20ad21cc5b1769e6de2510f74",
+   "size": 154185
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/031.jpg",
+   "sha256": "ca0d600856e1e547a06ad506a372da5e8dd4055c053604bd23574614d66e77df",
+   "size": 84912
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/032.jpg",
+   "sha256": "3e68d1319f2d404279148cddb51194bdf3d77b0ee6991079f2047ed40ce94378",
+   "size": 177450
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/033.jpg",
+   "sha256": "0fd462fdd4107b66c5157a09a23594ecdb9f99334d094d25898c5cad301c30fc",
+   "size": 172117
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/034.jpg",
+   "sha256": "481761b0ae88fd117021eb2ba0676e935b114e6f656b6ac0f30f7d0cb9f56d3c",
+   "size": 73837
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/035.jpg",
+   "sha256": "91724c3d33c4780d89157b3cc3c327add42ca5c625db1b68c4af0167fb8d1d1c",
+   "size": 174893
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/036.jpg",
+   "sha256": "0c95bcb483aeade2c5cd4c585529ab7e59170160f4dcbbb91d83bc3de7e15842",
+   "size": 173242
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/037.jpg",
+   "sha256": "6ce8e882a9e8f0ea46c176af4c15c23fccf7d890595ac0e3dcf15e17c198c2ce",
+   "size": 186083
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/038.jpg",
+   "sha256": "1e87a5f4eea2d38b9ccdaba7400c732e7c3ae20e7508129f3a805f4bdbc41532",
+   "size": 192098
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/039.jpg",
+   "sha256": "2f84b7b16882d1bcd94818305ae551436add1c4b2018c70b57629dc031d26d9d",
+   "size": 182168
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/040.jpg",
+   "sha256": "6bcfaf5270ce343e961bc48893e14cf80092b401a704d428a95f9b0361dc8ac2",
+   "size": 175153
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/041.jpg",
+   "sha256": "a0f3ea380cc3ea2591cb4dda5bc1eac8ac16d5fb33a7befe8ef8a3280a2c1e5b",
+   "size": 137958
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/042.jpg",
+   "sha256": "892bf010eb07f1acae2660a4089443ca9ccbfa87106bd94f660ef83d914086b7",
+   "size": 136565
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/043.jpg",
+   "sha256": "ac71e0c60cb0cdfafe73ee07c09e0bb25f2b594ea14d715f01a52fde791b02db",
+   "size": 69310
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/044.jpg",
+   "sha256": "6d79550f6aedfa3e319466eea37483726dfdf1bc8cf14ac74eb2ecc73ef1c88c",
+   "size": 172634
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/045.jpg",
+   "sha256": "5b46eadd2f3b1899a3aadbf046d5267d5668a8270ad89ce98065689f74e08f5c",
+   "size": 100226
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/046.jpg",
+   "sha256": "dae3f952c29f5519611693fd75f1fd879d410736d4e6e7651615816343d64bb4",
+   "size": 73704
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/047.jpg",
+   "sha256": "5e58f4a8445d9453ee5d4099c361f3c44b20dcaeab9651010af716539aef0f2b",
+   "size": 162354
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/048.jpg",
+   "sha256": "503af6a770adafddcecd21bc0ecb49e40b745b0ef714c1138785e996471a3e9e",
+   "size": 149857
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/049.jpg",
+   "sha256": "52af4c8ef357b7ca92d8ee33b1f77520be14c2e845a05e5b2ecf5de937502955",
+   "size": 156347
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/050.jpg",
+   "sha256": "4d682ee55381ebd1e463ea53504e54691af6d6b3709c379450d4073dd5b13383",
+   "size": 142752
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/051.jpg",
+   "sha256": "e23054b7fe8fa349e740ee82eb90eb004e852a2964747930d7814254da2b486f",
+   "size": 62207
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/052.jpg",
+   "sha256": "f5d532e13d6252d9ef171a13bcff34360a83749cc0ef94967a519dfbb3a4ad88",
+   "size": 111531
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/053.jpg",
+   "sha256": "62ad345797fa821bd46a35feda815498d89e926b67cce0055799cb163ea48b02",
+   "size": 115094
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/054.jpg",
+   "sha256": "e6af8ddf947db079bf2814b68643907f275b45d672f528f7ad509b9d817ae6e6",
+   "size": 132061
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/055.jpg",
+   "sha256": "5c917bd78abac6a84cbb34efb419ca9bf0d580f660d8e4d62aad0c6f4d03427a",
+   "size": 97296
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/056.jpg",
+   "sha256": "b72486abbf2a3d0f9f8a661c673cff9262c8c541e4a1644ff6d134b39bb6b283",
+   "size": 100662
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/057.jpg",
+   "sha256": "6f2193d7bd1620aa4dc0241348ed41b4ee324b72bba7e721d1ba5b7489f159f1",
+   "size": 75434
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/058.jpg",
+   "sha256": "adb2d1ba9284c3a420007e610d32faa76d4f93e84a7042d683015e2d8523d181",
+   "size": 69214
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/059.jpg",
+   "sha256": "6038b7f9deae271f7eeebd6a80b793445315005a030c7813418c177553e3a933",
+   "size": 111667
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/060.jpg",
+   "sha256": "211af14b1e3f33085c1e2991bf29d5c32cef46b532243c8b4b60491ef29703fc",
+   "size": 76692
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/061.jpg",
+   "sha256": "34d7113e5e7f50f8eace88ec285e7e2cdf5baaeb5f68755984401c0047129931",
+   "size": 61137
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/062.jpg",
+   "sha256": "0aab6deb6265f9413c736e60d661a07327d9d76125a59deb2f3cd9d244039ebf",
+   "size": 124775
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/063.jpg",
+   "sha256": "f19c19746a6c66b2afa41a781fea073f894256478bdc962d17b12df496ae3ff4",
+   "size": 97082
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/064.jpg",
+   "sha256": "dbfc0b665148a4db56460eaafef053eacf82235b40d01c1d82ebd7117a5bf666",
+   "size": 129975
+  },
+  {
+   "file": "scans/firasa-razi-hamdan/065.jpg",
+   "sha256": "276479efdb16a98f887e922ea2c12d474b6636b18c756d5eb7bd6125a2bbcdc1",
+   "size": 16445
   }
  ],
  "apk": {
