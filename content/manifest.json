@@ -8,8 +8,8 @@
    "label": "سراج",
    "kind": "generic",
    "file": "assistant.json",
-   "sha256": "1f49affdffe59c8bd2dbb4a7eaeb499a2bb98502fffdd9bcdac1d7cb287fce6c",
-   "count": 197,
+   "sha256": "591637ef9bf6f411bd3591bd433d873c032f9ac5767fd450912052b26f1ad59b",
+   "count": 213,
    "drawer": true,
    "card": "assistant",
    "menu": "سراج",
@@ -1193,7 +1193,7 @@
   }
  ],
  "apk": {
-  "versionCode": 9,
-  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=9"
+  "versionCode": 10,
+  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=10"
  }
 }

@@ -38,4 +38,44 @@ const mixed = [['السلام عليكم وش تفسير الماء', 'salam'], 
 for (const [t, k] of mixed) { n++; const r = smalltalk(t); if (!r || !r.rest || r.intents[0] !== k) fail(`«${t}» should be ${k}+question, got ${JSON.stringify(r)}`); }
 const nm = smalltalk('اسمي علي'); n++; if (!nm || nm.name !== 'علي') fail('name_set: ' + JSON.stringify(nm));
 const combo = smalltalk('السلام عليكم كيفك'); n++; if (!combo || combo.intents.length !== 2) fail('combo: ' + JSON.stringify(combo));
+
+// ---- how Saudis really write it: variants must be understood (stems, endings, stretched letters, intensifiers)
+const variants = {
+  greet: ['مرحبلي ملايين', 'مرحبلي', 'مرحبا ملايين', 'هلا بالف', 'هلا ومليون هلا', 'يا هلا بالغالي', 'هلاااا والله', 'يا مرحبا', 'مرحبا بالطيب', 'الف هلا', 'يا هلا ويا مرحبا', 'اهلين والله', 'هلا وغلا', 'هلا يا سراج', 'اهلا اهلا', 'ياهلا ومسهلا', 'حياك الله يا سراج'],
+  welcome: ['رحبلي', 'رحب فيني', 'قل مرحبا', 'مرحبا بي', 'استقبلني'],
+  salam: ['السلام عليكم ورحمة الله', 'سلامو عليكم', 'السلام عليكم يا سراج', 'سلام عليكم ورحمة الله وبركاته', 'السلام عليكم والرحمة'],
+  howare: ['كيف حالك يا غالي', 'شلونك يا سراج', 'كيفك اليوم', 'وش اخبارك يا طيب', 'كيف الحال', 'كيفكم'],
+  thanks: ['شكرا يا سراج', 'مشكور يا غالي', 'يعطيك العافيه يا سراج', 'الف شكر', 'شكرا جزيلا', 'مشكووور', 'جزاك الله خير يا سراج', 'ماقصرت يا غالي', 'تسلم يا سراج'],
+  fida: ['فداك يا سراج', 'جعلني الله فداك يا سراج', 'جعلني فدا لك', 'جعلني فداااك'],
+  dua: ['الله يوفقك يا سراج', 'الله يحفظك ويرعاك يا سراج', 'بارك الله فيك يا سراج', 'الله يجزاك الجنه'],
+  praise: ['احسنت يا سراج', 'ما شاء الله عليك', 'كفو يا سراج', 'ممتاز يا سراج', 'يا سلام عليك', 'جوابك ممتاز'],
+  bye: ['مع السلامه يا سراج', 'في امان الله يا غالي', 'الله معك', 'يلا مع السلامه'],
+  night: ['تصبح على خير يا سراج', 'تصبحون على خير', 'نوم العوافي يا غالي'],
+  miss: ['وينك يا سراج', 'اشتقنا لك', 'من زمان يا سراج', 'وحشتني'],
+  joke: ['قل لي نكته', 'عندك نكته', 'ضحكني'], chat: ['سولف معي', 'تعال نسولف', 'وش الجديد', 'وش عندك'], wait: ['لحظه', 'ثواني', 'استنى شوي'],
+  lost: ['ما ادري وش اسال', 'محتار', 'من وين ابدا', 'علمني', 'ابغى اتعلم'],
+  dream_start: ['عندي حلم', 'عندي حلم ابغى تفسيره', 'ابغى تفسير حلم', 'شفت حلم', 'ابغى اعبر رويا', 'عندي رؤيا'],
+  who: ['وش اسمك يا حلو', 'من انت يا سراج', 'عرفني بنفسك يا سراج', 'ايش تقدر تسوي لي'],
+  ack: ['تمام يا سراج', 'ماشي يا غالي', 'اوكي تمام'],
+};
+for (const [kind, list] of Object.entries(variants)) for (const t of list) { n++; const r = smalltalk(t);
+  if (!r || r.rest) { fail(`variant «${t}» should be ${kind}, got ${JSON.stringify(r)}`); continue; }
+  if (!(r.intents.includes(kind) || (kind === 'greet' && r.intents.includes('welcome')))) fail(`variant «${t}» should include ${kind}, got ${r.intents}`); }
+// ---- false positives: nothing from the real dictionaries may be taken as small talk
+import { readFileSync } from 'node:fs';
+const sweep = new Set();
+for (const [h] of JSON.parse(readFileSync('content/books.json', 'utf8')).h) { const w = String(h).trim(); if (w && w.split(/\s+/).length <= 4) sweep.add(w); }
+for (const f of ['kutubtabir', 'kutubfiras', 'nazm', 'muabbirun']) for (const r of JSON.parse(readFileSync(`content/${f}.json`, 'utf8')).h) if (r[0]) sweep.add(String(r[0]));
+for (const r of JSON.parse(readFileSync('content/assistant.json', 'utf8')).h) if (r[0] === 'topic') for (const t of JSON.parse(r[1]).triggers ?? []) sweep.add(t);
+const norm = (x) => x.replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[^ء-ي\s]/g, ' ').replace(/\s+/g, ' ').trim();
+const known = (flat) => sweepNorm.has(flat); const sweepNorm = new Set([...sweep].map(norm));
+// (1) with the dictionary guard (what the app does) no headword may be taken as small talk, except the greetings themselves
+const guarded = []; for (const w of sweep) { const r = smalltalk(w, known); if (r && !r.rest) guarded.push(`${w} → ${r.intents}`); }
+// (2) the fuzzy second pass must add (almost) no collisions of its own
+const exactOnly = new Set(); for (const w of sweep) { const r = smalltalk(w, undefined, false); if (r && !r.rest) exactOnly.add(w); }
+const fuzzyOnly = []; for (const w of sweep) { if (exactOnly.has(w)) continue; const r = smalltalk(w, known); if (r && !r.rest) fuzzyOnly.push(`${w} → ${r.intents}`); }
+n += sweep.size; console.log(`swept ${sweep.size} real headwords / titles / topics: ${guarded.length} taken as small talk with the guard (greetings only), ${fuzzyOnly.length} added by fuzzy matching`);
+for (const h of [...guarded, ...fuzzyOnly].slice(0, 30)) console.log('  ?', h);
+if (fuzzyOnly.length > 0) fail(`fuzzy matching hijacked ${fuzzyOnly.length} real headwords`);
+if (guarded.filter((g) => !/→ (?:ack|salam|greet|welcome|thanks|bye|howare|dua|fida|morning|evening|night|miss|blessing)/.test(g)).length) fail('non-greeting headwords were hijacked despite the guard');
 console.log(bad ? `\n${bad} failed of ${n}` : `all ${n} checks passed`); process.exit(bad ? 1 : 0);

@@ -48,6 +48,7 @@ const STOP = new Set(('وش ايش شنو شو ليش لماذا كيف متى �
   'ابغى ابغا ابي ابى ابا بغيت اريد اريدك ممكن لو سمحت تعطيني اعطني عطني قل قولي قوللي قول ورني وريني ابحث دور دورلي ابحثلي بحث لقيت اعرف عرفني اعلم علمني عندك عندي يعني طيب زين الله يعطيك العافيه ' +
   'كتاب كتب ذكر ذكروا ذكرو قال قالوا قالو جاء ورد وردت كل بعض اي ايها هالموضوع موضوع شي شيء اشياء بخصوص حول تخص يخص بالنسبه خاص يا اخي ياخي والله فيه فيها فيهم عنها عنه عنهم بين بعد قبل ثم او ام اذا لو لكن بس فقط ' +
   'تفسير تفسيرها تفسيره تعبير تعبيرها تعبيره تاويل تاويلها معنى معناها معناه يدل يدلون دلاله وش ايش فسر فسروا فسرو فسرها فسره يفسرون عبر عبروا عبرو عبرها يعبرون ذكرها ذكره ذكرو قالو قالوا قالها قاله اللي الي').split(/\s+/));
+const CONTEXT = new Set('منام منامات منامي منامه حلم احلام حلمي حلمه رويا رويه رويتي رويتك نوم نومي'.split(' '));
 const TITLE_STOP = new Set('كتاب في علم من الى على عن و ال بين'.split(' '));
 const STRUCT = new Set('فهرس فهرست الفهرس فصل فصول الفصل باب ابواب الباب مقاله مقالات مبحث مباحث وحده محتويات المحتويات عناوين عنوان'.split(' ').map((w) => normalize(w)));
 const dreamWords = /رؤيا|رويا|حلم|احلام|منام|شفت|رايت|حلمت/;
@@ -113,7 +114,10 @@ const snippet = (text: string, keys: Set<string>, max = 300): string => {
 interface Q { raw: string; norm: string; toks: string[]; content: string[]; exp: string[]; }
 function parseQuery(raw: string): Q {
   const norm = normalize(raw); const toks = tokens(norm);
-  const content = toks.filter((w) => !STOP.has(w) && !STOP.has(queryStem(w)) && w.length >= 2);
+  const all = toks.filter((w) => !STOP.has(w) && !STOP.has(queryStem(w)) && w.length >= 2);
+  // «تفسير الماء في المنام»: the words that only say it is a dream do not name the symbol, and asking for them too hides the symbol (few entries say «المنام») → left out when the symbol is named
+  const named = all.filter((w) => !CONTEXT.has(queryStem(w)));
+  const content = named.length ? named : all;
   let exp: string[] = [];
   try { const dv = dialectVariants(content.join(' ') || raw, true); exp = [...new Set(dv.variants.slice(1).flatMap((v) => tokens(normalize(v))))].filter((w) => !content.includes(w) && !STOP.has(w) && w.length >= 3).slice(0, 10); } catch { /* the words as typed only */ }
   return { raw, norm, toks, content, exp };
@@ -123,14 +127,17 @@ function parseQuery(raw: string): Q {
 function namedBooks(q: Q, books: BookMeta[]): BookMeta[] {
   const df = new Map<string, number>(); const tt = books.map((b) => [...new Set(stems(b.title + ' ' + b.card.author).filter((w) => !TITLE_STOP.has(w)))]);
   tt.forEach((ws) => ws.forEach((w) => df.set(w, (df.get(w) ?? 0) + 1)));
-  const qs = new Set(q.toks.flatMap((w) => keysOf(w))); const res: { b: BookMeta; s: number }[] = [];
+  // «الماء في المنام» does not name the book «المنامات»: dream-context words count for a title only when the question says «كتاب» or has nothing else
+  const strong = q.content.length > 0 && q.content.every((w) => !CONTEXT.has(queryStem(w))) && !/كتاب|كتب|مرجع/.test(q.norm);
+  const qt = q.toks.filter((w) => !strong || !CONTEXT.has(queryStem(w)));
+  const qs = new Set(qt.flatMap((w) => keysOf(w))); const res: { b: BookMeta; s: number }[] = [];
   books.forEach((b, i) => {
     const title = [...new Set(stems(b.title).filter((w) => !TITLE_STOP.has(w)))]; if (!title.length) return;
     const idf = (w: string) => Math.log(1 + books.length / (df.get(w) ?? 1));
     const m = (w: string) => keysOf(w).some((k) => qs.has(k)); const got = title.filter(m); const tot = title.reduce((a, w) => a + idf(w), 0); const have = got.reduce((a, w) => a + idf(w), 0);
     const auth = stems(b.card.author).filter((w) => !TITLE_STOP.has(w) && w !== 'ابن' && w.length >= 3); const authHit = auth.length > 0 && auth.every(m);
     let s = tot ? have / tot : 0; if (authHit && got.length) s = Math.max(s, 0.75); else if (authHit && title.length > 2) s = Math.max(s, 0.5);
-    const exact = (w: string) => q.toks.some((x) => queryStem(x) === w);                  // a word of the title spelled as in the title
+    const exact = (w: string) => qt.some((x) => queryStem(x) === w);                  // a word of the title spelled as in the title
     const uniq = title.filter((w) => (df.get(w) ?? 0) === 1 && w.length >= 4 && exact(w));       // a word that only this book's title holds: it names the book
     if (uniq.length) s = Math.max(s, 0.7);
     if (got.length === 1 && title.length >= 3 && !authHit && !uniq.length) s = Math.min(s, 0.4);
@@ -159,6 +166,10 @@ const tocOpen = (b: BookMeta, e: BookMeta['card']['toc'][number]): Open[] => {
 const tocPlace = (b: BookMeta, e: BookMeta['card']['toc'][number]) => `${b.title}${e[3] ? ` — ص ${e[3]}` : ''}`;
 
 // ---------- the answer ----------
+/** the headword of a dictionary entry is the very word the user typed (the article and the vocalisation do not matter) */
+const bare = (w: string) => normalize(w).replace(/^(?:وال|ال)/, '');
+const sameHead = (ref: string, flat: string) => { const a = bare(ref), b = bare(flat); return !!a && a === b; };
+
 export class Assistant {
   private mem: Memory | null = null; private userName = ''; private texts = new Map<string, Promise<BookText | null>>(); private topics: Topic[];
   constructor(private ctx: Ctx) { this.topics = parseTopics(ctx.phrases.topic ?? []); }
@@ -180,7 +191,7 @@ export class Assistant {
     if (kinds[0] === 'name_ask') return this.reply(this.userName ? this.say('chat_name_ask', { name: this.userName }) : this.say('chat_name_unknown'));
     if (kinds[0] === 'name_set' && name) this.userName = name;
     const parts = kinds.map((k, i) => this.say(cat(k, kinds.length > 1 && i === 0), { name: this.userName || name || '' })).filter(Boolean);
-    const chips = kinds.some((k) => k === 'who' || k === 'greet' || k === 'salam' || k === 'howare' || k === 'ack') ? this.suggestions() : [];
+    const chips = kinds.some((k) => ['who', 'greet', 'salam', 'howare', 'ack', 'lost', 'chat', 'joke', 'welcome', 'miss'].includes(k)) ? this.suggestions() : [];
     return this.reply(parts.join(' ') || this.say('hello'), [], chips);
   }
 
@@ -188,7 +199,9 @@ export class Assistant {
     const ctx = this.ctx;
     // a kind word is answered kindly (a greeting, thanks, a blessing, «جعلني فداك»…); a greeting before a real question is answered first, then the question
     if (social) {
-      const st = smalltalk(raw);
+      // a one-word message that is a dream symbol of the dictionary («حمار»، «ثعبان») is a question about it, not small talk
+      const eng = ctx.engine; const known = eng ? (flat: string) => { try { return eng.lookup('books', flat).results.some((r) => r.group === 'meaning' && sameHead(r.doc.ref ?? '', flat)); } catch { return false; } } : undefined;
+      const st = smalltalk(raw, known);
       if (st && !st.rest) return this.social(st.intents, st.name);
       if (st && st.rest) { const pre = this.say(st.intents[0] === 'greet' ? 'pre_greet' : 'pre_' + st.intents[0]); const r = await this.ask(st.rest, false); return pre ? { ...r, text: `${pre} ${r.text}` } : r; }
     }
