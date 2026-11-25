@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">المكتبة الشاملة</string>
+    <string name="title_activity_main">المكتبة الشاملة</string>
+    <string name="package_name">com.alboheth.assistant</string>
+    <string name="custom_url_scheme">com.alboheth.assistant</string>
+</resources>

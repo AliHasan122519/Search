@@ -1,0 +1,26 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 400, height: 860 }, deviceScaleFactor: 2 })).newPage();
+  const errs = []; p.on('pageerror', (e) => errs.push(String(e)));
+  await p.goto('http://localhost:4188/'); await p.waitForSelector('.as-chat .as-bot', { timeout: 40000 });
+  const ok = (n, c) => console.log(c ? 'PASS' : 'FAIL', '|', n);
+  ok('home is the assistant', (await p.locator('.as-home .as-input').count()) === 1 && (await p.locator('.tabs, .hero').count()) === 0);
+  await p.screenshot({ path: '../home.png' });
+  await p.click('button.menu-toggle'); await p.waitForSelector('.drawer');
+  const items = await p.locator('.drawer-item').allInnerTexts(); console.log(items.map((x) => x.trim()).join(' | '));
+  ok('menu: the four lists', items.length === 4 && /كتب علم التعبير/.test(items[0]) && /نظم/.test(items[1]) && /الفراسة/.test(items[2]) && /قواعد/.test(items[3]));
+  await p.screenshot({ path: '../menu.png' });
+  await p.locator('.drawer-item', { hasText: 'نظم علم التعبير' }).click(); await p.waitForSelector('.lib-tile'); ok('nazm list', (await p.locator('.lib-tile').count()) === 2);
+  await p.screenshot({ path: '../nazm.png' });
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  await p.click('button.menu-toggle'); await p.locator('.drawer-item', { hasText: 'قواعد علم التعبير' }).click(); await p.waitForSelector('.rule-card'); ok('qawaid list', (await p.locator('.rule-card').count()) >= 20);
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  await p.click('button.menu-toggle'); await p.locator('.drawer-item', { hasText: 'كتب الفراسة' }).click(); await p.waitForSelector('.lib-tile'); ok('firasa list', (await p.locator('.lib-tile').count()) === 27);
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  ok('assistant still home after closing a list', (await p.locator('.as-home .as-input').count()) === 1);
+  await p.locator('.as-input').fill('ما حكم تعبير الرؤيا'); await p.locator('.as-send').click(); await p.waitForSelector('.as-tier', { timeout: 60000 }); await p.waitForTimeout(900);
+  ok('discussion: proofs by tier', (await p.locator('.as-tier').count()) >= 3);
+  await p.screenshot({ path: '../answer.png' });
+  await p.locator('.as-input').fill('وش فسروا الثعبان'); await p.locator('.as-send').click(); await p.waitForFunction(() => document.querySelectorAll('.as-bot:not(.as-typing)').length >= 3, null, { timeout: 60000 }); ok('a symbol question works (dictionary hidden source)', (await p.locator('.as-bot:not(.as-typing)').last().locator('.as-card').count()) >= 1);
+  console.log('errors:', errs.length, errs.slice(0, 2)); await b.close();
+})();

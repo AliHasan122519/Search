@@ -1,0 +1,35 @@
+{
+  "name": "assistant-lite",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "المكتبة الشاملة: المساعد الذكي وكتب التعبير ونظمه وكتب الفراسة وقواعد التعبير",
+  "scripts": {
+    "dev": "node scripts/sync_content.mjs && vite",
+    "build": "node scripts/sync_content.mjs && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node tests/e2e.mjs",
+    "build:android": "node scripts/sync_content.mjs && tsc --noEmit && vite build --mode android && cap sync android",
+    "content:validate": "node scripts/validate_content.mjs",
+    "build:ios": "node scripts/sync_content.mjs && tsc --noEmit && vite build --mode ios && cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/ios": "^6.2.3",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.1",
+    "@fontsource/amiri-quran": "^5.2.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "axe-core": "^4.14.1",
+    "playwright-core": "^1.65.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

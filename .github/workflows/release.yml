@@ -1,0 +1,84 @@
+name: بناء ونشر التطبيق
+
+# كل رفع إلى main يغيّر التطبيق أو محتواه يبني APK موقَّعًا وينشره، فيصل إلى كل المستخدمين تلقائيًا عند فتحهم التطبيق.
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'content/**', 'public/**', 'android/**', 'index.html', 'package*.json', 'vite.config.ts', 'capacitor.config.json', '.env.android']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: التحقق من مفتاح التوقيع
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KS" ] || [ -z "$PW" ]; then
+            echo "::error::أضف السرّين ANDROID_KEYSTORE_BASE64 و ANDROID_KEYSTORE_PASSWORD في Settings > Secrets and variables > Actions (القيم في ملف github-secrets.txt)"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: رقم الإصدار (يزيد وحده مع كل بناء)
+        run: |
+          VC=$((GITHUB_RUN_NUMBER + 10))
+          echo "VC=$VC" >> "$GITHUB_ENV"
+          sed -i "s/versionCode [0-9]*/versionCode $VC/; s/versionName \"[^\"]*\"/versionName \"1.$VC\"/" android/app/build.gradle
+          sed -i "s/^VITE_APK_VERSION=.*/VITE_APK_VERSION=$VC/" .env.android
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: بناء الواجهة
+        run: npm run build:android
+
+      - name: توقيع وبناء الـAPK
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KS" | base64 -d > android/release.jks
+          printf 'storeFile=../release.jks\nstorePassword=%s\nkeyAlias=assistant\nkeyPassword=%s\n' "$PW" "$PW" > android/keystore.properties
+          cd android && ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk ../almaktaba.apk
+          rm -f release.jks keystore.properties
+
+      - name: نشر الإصدار
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          NOTES=$(printf '%s' "${MSG:-تحديث جديد}" | head -n1 | cut -c1-120)
+          gh release create "v$VC" almaktaba.apk --title "الإصدار 1.$VC" --notes "$NOTES"
+          URL="https://github.com/${{ github.repository }}/releases/download/v$VC/almaktaba.apk"
+          NOTES="$NOTES" URL="$URL" node -e '
+            const fs = require("fs"); const m = JSON.parse(fs.readFileSync("content/manifest.json", "utf8"));
+            m.apk = { versionCode: Number(process.env.VC), url: process.env.URL, notes: process.env.NOTES };
+            fs.writeFileSync("content/manifest.json", JSON.stringify(m, null, 1) + "\n");'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/manifest.json
+          git commit -m "نشر الإصدار 1.$VC" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
