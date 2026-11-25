@@ -540,3 +540,16 @@ html[data-theme="dark"] .lib-actions .lib-dl, html[data-theme="dark"] .lib-actio
 .reveal-on .lib-tile.gone { opacity: 0; transform: translateY(-20px) scale(.94); transition-duration: .35s; transition-delay: 0ms; }
 .reveal-on .lib-tile.seen:hover { transform: translateY(-3px); }
 @media (prefers-reduced-motion: reduce) { .reveal-on .lib-tile { opacity: 1; transform: none; transition: none; } }
+
+/* the library list, scroll-linked: every book fades and rises in as it comes up from the bottom edge and softly fades and floats off as it nears the top edge; the fade follows the finger exactly (no jumps) */
+@supports (animation-timeline: view()) {
+  .lib-grid .lib-tile { animation: lib-tile-fade linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; will-change: opacity, transform; }
+  .lib-grid .lib-tile:hover { transform: none; translate: 0 -3px; }
+  @keyframes lib-tile-fade {
+    0%   { opacity: 0;   transform: translateY(54px) scale(.86); filter: blur(3px); }
+    24%  { opacity: 1;   transform: none; filter: none; }
+    74%  { opacity: 1;   transform: none; filter: none; }
+    100% { opacity: 0;   transform: translateY(-40px) scale(.9); filter: blur(2px); }
+  }
+}
+@media (prefers-reduced-motion: reduce) { .lib-grid .lib-tile { animation: none !important; opacity: 1; transform: none; filter: none; } }

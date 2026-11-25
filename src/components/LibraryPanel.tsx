@@ -162,11 +162,12 @@ const MARKS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g;
 /** letters of a title without vocalisation, with hamza / ya / ta marbuta folded, so that «الاحلام» finds «الأحلام» */
 const plain = (t: string) => t.replace(MARKS, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
 
-/** The books appear and fade as the list is scrolled: a tile rises into view when it enters the screen and floats away upward when it leaves at the top. Skipped when the phone asks for less motion. */
+/** The books appear and fade as the list is scrolled. A phone that supports scroll-linked animation (styles.css) fades each tile continuously with the finger; any other phone gets this fallback: a tile rises into view when it enters the screen and floats away upward when it leaves at the top. Skipped when the phone asks for less motion. */
 function useReveal(panel: React.RefObject<HTMLElement>, dep: unknown) {
   useEffect(() => {
     const root = panel.current; if (!root || typeof IntersectionObserver === 'undefined') return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.CSS?.supports?.('animation-timeline: view()')) return;        // the phone can tie the fade to the scroll itself (see styles.css): smoother, nothing to do here
     const tiles = [...root.querySelectorAll<HTMLElement>('.lib-tile')]; if (!tiles.length) return;
     root.classList.add('reveal-on');
     const io = new IntersectionObserver((entries) => {
