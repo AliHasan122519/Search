@@ -6,7 +6,7 @@ import { topmost } from './DreamsPanel';
 import { BookEmbed } from './BookEmbed';
 
 /** `toc` entry: [level, title, paragraph, 1?] — a 4th item (1) means the title is not a paragraph of the text (the reader jumps to the page only).  `lf`: [first paragraph, scan page] of each page of a text made from a scan (the page image can be shown); `weak`: paragraphs that start a page that was read poorly. */
-export interface BookData { v: number; key: string; ocr: boolean; scanText?: boolean; toc: [number, string, number, number?][]; p: string[]; pg: [number, string][]; lf?: [number, number][]; weak?: number[]; }
+export interface BookData { v: number; key: string; ocr: boolean; scanText?: boolean; toc: [number, string, number, number?][]; p: string[]; pg: [number, string][]; lf?: [number, number][]; weak?: number[]; q?: [number, number]; }
 const CHUNK = 3200;                                     // letters in one page of the reader
 const SIZES = [0.9, 1, 1.15, 1.3, 1.5];
 const MARK = /[\u064B-\u065F\u0670\u0640]/;
@@ -105,7 +105,7 @@ export function BookReader({ title, file, load, scan, startAt, onClose }: { titl
         {err && <p className="rd-msg" role="alert">{err}</p>}
         {!data && !err && <p className="rd-msg" role="status">جارٍ فتح الكتاب…</p>}
         {data?.ocr && (
-          <p className="rd-ocr" role="note">{data.scanText ? 'نص مقروء آلياً (OCR) وقد تبقى فيه أخطاء، والمرجع صورة الصفحة.' : 'نص مقروء آلياً (OCR) وقد تكثر فيه الأخطاء.'}{scan && <> <button type="button" className="rd-link" onClick={() => setScanOn(data.scanText ? leafOf(i0) : null)}><Images size={15} aria-hidden="true" /> {data.scanText ? 'اعرض صورة هذه الصفحة' : 'اعرض صور الصفحات الأصلية'}</button></>}</p>
+          <p className="rd-ocr" role="note">{data.q ? `جودة القراءة الآلية لهذا الكتاب: ${['', 'جيدة', 'متوسطة', 'ضعيفة'][data.q[0]]}. ` : ''}{data.scanText ? 'نص مقروء آلياً (OCR) وقد تبقى فيه أخطاء، والمرجع صورة الصفحة.' : 'نص مقروء آلياً (OCR) وقد تكثر فيه الأخطاء.'}{scan && <> <button type="button" className="rd-link" onClick={() => setScanOn(data.scanText ? leafOf(i0) : null)}><Images size={15} aria-hidden="true" /> {data.scanText ? 'اعرض صورة هذه الصفحة' : 'اعرض صور الصفحات الأصلية'}</button></>}</p>
         )}
         {data && (
           <>

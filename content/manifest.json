@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": 492,
- "updated": "2026-11-25T22:44:36Z",
+ "version": 493,
+ "updated": "2026-11-25T23:04:14Z",
  "tabs": [
   {
    "id": "assistant",
@@ -143,8 +143,8 @@
   },
   {
    "file": "books/qadiri.json",
-   "sha256": "f1942216bc93087fc3ad8394940486ae849f5cf0a76c71e0388b20fe83d9b91c",
-   "size": 1949112
+   "sha256": "ff4f5480f155d0fdf3c925de279ebd077bebd2cd7ea87ae1c1fe7b8db92b12ec",
+   "size": 1949124
   },
   {
    "file": "books/badr-munir.json",
@@ -173,8 +173,8 @@
   },
   {
    "file": "books/tabir-artemidorus.json",
-   "sha256": "0f4eca89c2ad6ed4f2833e9e1bfaca28ee2faa91476254f8e2f4e8bc2142ab97",
-   "size": 548929
+   "sha256": "cf897df7e0a67c013e527d4674457fad59e4cacd077d00c79cd777dc7ccc1098",
+   "size": 548941
   },
   {
    "file": "books/ilm-firasa-hadith.json",
@@ -378,148 +378,148 @@
   },
   {
    "file": "books/firasa-razi.json",
-   "sha256": "48958975cbd6461bff8a94366dd8575927d241a23dfbe4640fc0c09fc478e049",
-   "size": 200391
+   "sha256": "a0f9cf29fd19edafdf01897e23e898a42ce6685591f8b0b8800677a247b6175d",
+   "size": 200403
   },
   {
    "file": "books/firasa-murad.json",
-   "sha256": "36b27950c6f686adf6e7f205b484e1c425370b7e3e0ed14f17541c2e25d53dd1",
-   "size": 375146
+   "sha256": "7cc6c746381e62d4a648a2d5afe75dfb9dda90d523cd8520d113716feeb77d95",
+   "size": 375159
   },
   {
    "file": "books/pers-anmat.json",
-   "sha256": "45e418a8730473d6dfda6da75c32b5931504a9b9312322de699608df68623225",
-   "size": 334741
+   "sha256": "925e4a9eab25e8e575ebbc1f984704995ee5b857e66fced50ba0cc76237906b3",
+   "size": 334753
   },
   {
    "file": "books/pers-farasa-jasad.json",
-   "sha256": "a8749a68780e286579ed3f4833cb931ba7237fc8cf368f85dc79946bc7f02b8d",
-   "size": 243794
+   "sha256": "f495cbe1c23269de61f6a363f7ea0dd910257aa57ff3d71302d433c34ced56aa",
+   "size": 243807
   },
   {
    "file": "books/pers-jasad-nafsiya.json",
-   "sha256": "68981d146f4d50df252a3577811f5cf332c6adbd93da9d4ea393590bdf82ff84",
-   "size": 856219
+   "sha256": "e30b06f786536acd7236c22f252399550a7932a8ff0689c3cd13dea7a5a505ae",
+   "size": 856232
   },
   {
    "file": "books/pers-wujuh-tickle.json",
-   "sha256": "e0f87532df6bcf3f315f02230ee61acfd9fa98b64e4a39c210d7f8907bcdf813",
-   "size": 570992
+   "sha256": "fc9ee49de4805b611ab6e396b95ef7d87881d3ecb1da4e11274cab81971a965a",
+   "size": 571004
   },
   {
    "file": "books/pers-600-simat.json",
-   "sha256": "f4eeedb6ef5d57ecbe8b7f2f2e40501cf931969f9563933085f77791f1b2d710",
-   "size": 364831
+   "sha256": "b511170103e84a34cd08f23d14ce9467ec2f94bb9478e239dc0c38c752c4d9e0",
+   "size": 364843
   },
   {
    "file": "books/pers-lughat-wujuh.json",
-   "sha256": "2c3b0698548521089a0fb4eb5cfec5c31c33915d6300edce693d8db093e6648f",
-   "size": 56657
+   "sha256": "75f9d23095352e6c7f49fddce260f1903d9891bcd8b5cbe5e44c47d7d94477a3",
+   "size": 56669
   },
   {
    "file": "books/pers-dalil-sifat.json",
-   "sha256": "213e7cb38222d948f8f6f5efa35ff3222291eb6ada78c51a5cac32b0b4f85777",
-   "size": 94928
+   "sha256": "f1f6c439622a84a854b9c99b2bc8a52bae429bf2ddf9f13e64b3a38244c3fab4",
+   "size": 94940
   },
   {
    "file": "books/pers-nazariyat.json",
-   "sha256": "000b17d2996ead811883146af5deec7cf2730b9f8db1fdc3e8392e71efce29d1",
-   "size": 2146630
+   "sha256": "8eb4355570b02aef95edbdddb66f26dba92e57d17ffc5e3ad9e3240e78e5970b",
+   "size": 2146642
   },
   {
    "file": "books/tabir-muraqiba.json",
-   "sha256": "3ce0f7a74c14793ef77c5bf33868ff5d9f8f89aaa4c96cad53cebca8c26701ad",
-   "size": 987736
+   "sha256": "02c2cdb61b13853125d396b58a95ef414e234bd67181e742a65f3db53473047f",
+   "size": 987748
   },
   {
    "file": "books/tabir-qutayba-gheras.json",
-   "sha256": "3b86d37be6bbd51f65c277924d4b981356f5826a2b402a1029be5a454f65acee",
-   "size": 1286677
+   "sha256": "0e751ad0fbc6cfa662cb2134738ef02f6e3115e8bc507f46945e69e9cea22d87",
+   "size": 1286689
   },
   {
    "file": "books/tabir-qutayba-bashair.json",
-   "sha256": "f71f28743ec52e4a3d650ee0d162280ba3eaabfee3f6028301b92460867cca31",
-   "size": 545826
+   "sha256": "34296e5ae42588b1de41a26bd78f5dab76a76a75aa9b90a2596912841108c9f8",
+   "size": 545838
   },
   {
    "file": "books/tabir-madkhal.json",
-   "sha256": "6b3e8afd72228be8ed313169f995f914ac0323b32764b280c1a11d7f14ee1ecf",
-   "size": 519160
+   "sha256": "8b86720d393e4c9e5d98312a88770c7b906f3ea4e3b18eb0bb9c0b0cb7fc3e1b",
+   "size": 519172
   },
   {
    "file": "books/pers-tahlil-badran.json",
-   "sha256": "ce4eb981c048d7b1e304bb3c1689c35dd2de0127edd556deea76de117b438728",
-   "size": 91087
+   "sha256": "69d67137db1497d99c4a7e9b576b4b6995c436c5ae38c0e1a31843c087be0585",
+   "size": 91099
   },
   {
    "file": "books/pers-shakhsiya-badran.json",
-   "sha256": "f306c8317d925171acc1a269c715df66e7113fca305dd4d8dc1d2d7ce493834f",
-   "size": 223379
+   "sha256": "2303fa5aa13c57dde1f8ad19e0078953de2524ee2e34646e1c5ee7e6e1394687",
+   "size": 223391
   },
   {
    "file": "books/pers-tahlil-barakat.json",
-   "sha256": "6bca06697e91ccfa37d33319ae73ef777a08ba5b0b24ed03b6f43656151f8913",
-   "size": 423549
+   "sha256": "757ebce24cf999fe7bf6351be435721eda251814ebecf56580715e122f90e47d",
+   "size": 423562
   },
   {
    "file": "books/pers-enneagram.json",
-   "sha256": "eb4c5ea11e80ba5de11fa13acaf89d4abd1206ab1cba67636c5ad59a8183989c",
-   "size": 520701
+   "sha256": "19e0647caf328c9843640fe2961929b2fb05493082bdefd03aab4d9633f87c13",
+   "size": 520714
   },
   {
    "file": "books/pers-koushi.json",
-   "sha256": "b8b47c069c99bc4ee821c30e8f931397585af9b73fefea28d0e7bcddb5ff0b7d",
-   "size": 417397
+   "sha256": "ae24fdc385e4c0a3971a558861e1bd8cdad281c83295c64b8f0e9cfa20d8bc55",
+   "size": 417409
   },
   {
    "file": "books/pers-akhlaq-sira.json",
-   "sha256": "ea33cc2679b09cb9e87a17bad0839fec8c464a8b720ae576c9315a5d1bdd2f7b",
-   "size": 369600
+   "sha256": "68af13d13f9038246014524243accb215ab2c4942e9629664bcd5c98e6bb5b19",
+   "size": 369613
   },
   {
    "file": "books/pers-pease-mufassal.json",
-   "sha256": "d18ea781326a621b5cafbcb828d36869cd5b9aaebe4936dd52d627711838b8a2",
-   "size": 993354
+   "sha256": "8903105a216800ba27eea24570f69475ba3aa1a452bda7d1ac32207bebffc3ad",
+   "size": 993366
   },
   {
    "file": "books/pers-pease-marji.json",
-   "sha256": "5c517e7a2cc6550374cffc33d69872e8f124832456ce9afafa252f15c319a715",
-   "size": 820792
+   "sha256": "351eb63733ab928358d993f44955de450136db20988c5fbc3f61e536bc3a4585",
+   "size": 820804
   },
   {
    "file": "books/pers-hagen.json",
-   "sha256": "c63af016a3b8c55145d9df2ef9640cf08d713769a196859b1559b770a57198ba",
-   "size": 792901
+   "sha256": "f8e53c1dfb44c323e6c2ca5f0b9f587acba72aa7d2df8b251ea679303f63b0d6",
+   "size": 792913
   },
   {
    "file": "books/pers-musayhij.json",
-   "sha256": "7d33d20aba37908cc1ac7e7151464695ba736f77552ac523f55522579d70b515",
-   "size": 336647
+   "sha256": "66aa1a7574b9c4a235a0c92e71d33c36bd755be4f2ef07720efd7ca4b1bf24a9",
+   "size": 336660
   },
   {
    "file": "books/pers-ghanem.json",
-   "sha256": "ece0625ba97344d01bb09d4ee93a7a0fbeec286a49df31ed2aeb585728c69c76",
-   "size": 406212
+   "sha256": "d8af0ca1b55e82b948984e2812bdff8239be67f7c0cfec726bd545a78128bcb0",
+   "size": 406224
   },
   {
    "file": "books/pers-aqeel.json",
-   "sha256": "e4d3e567e6ab02d5f6ea67c1b11815de1e34f9c4aacfaeeea3a559021421d81b",
-   "size": 1069901
+   "sha256": "fd524e91f26ede9af65b718457a77171a05a138e555d50ae612722a40523e6d5",
+   "size": 1069913
   },
   {
    "file": "books/pers-arabgroup.json",
-   "sha256": "fa409dec78213135d9b01041ae2f16fee49d45566c683f36574f140e03a55c13",
-   "size": 125664
+   "sha256": "52a00cca85e4dc5bc34fb87bb7835c0f3704d21b8fd3e98a2b8ee6ac909dabe6",
+   "size": 125676
   },
   {
    "file": "books/pers-pervin.json",
-   "sha256": "815f9ebc1360677d8d0d76efb57d9135cab1f356e91ccb0a1fa398bf82d48785",
-   "size": 1297127
+   "sha256": "ba6442b68daacf7f71c1cd2a2aa61ba33a51fb19a1e4cfe7987abe46d62e5761",
+   "size": 1297140
   },
   {
    "file": "books/pers-hariri.json",
-   "sha256": "c9b56814466653da331e84d7234a3d2925ceacea77e29458f56b772a2f724cda",
-   "size": 910830
+   "sha256": "663b6c657eabb0a36880b8c6fa69ad990dc62352f05bf860b3abdb03a3fb7de8",
+   "size": 910843
   },
   {
    "file": "scans/alfiya-wardiyya/000.jpg",
@@ -1183,8 +1183,8 @@
   },
   {
    "file": "books/muraqiba-omran.json",
-   "sha256": "91fc8c2a54288cc3c599ab743e4b50332a11d86c4828695fd72f3b437e5bbc68",
-   "size": 843383
+   "sha256": "aaaafbcbdce763800bcdcc430254993c1966f5c3b2430406be7b1738f2b6e2bf",
+   "size": 843395
   },
   {
    "file": "covers/muraqiba-omran.jpg",
@@ -2708,8 +2708,8 @@
   },
   {
    "file": "books/firasa-razi-hamdan.json",
-   "sha256": "59af11f09892025701d2cc6c2b3d0bcd58ff852981cca6b996ae686a333be048",
-   "size": 97633
+   "sha256": "0e3901f3079dd027a23a62a73e37e67384e7b74ba74aa478fb00d56b57fbc2fc",
+   "size": 97645
   },
   {
    "file": "covers/firasa-razi-hamdan.jpg",
