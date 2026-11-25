@@ -48,7 +48,7 @@ public class FileDownloaderPlugin extends Plugin {
             r.setAllowedOverMetered(true); r.setAllowedOverRoaming(true);
             String where = "downloads";
             // Android 10+ lets the download manager write to the public «Downloads» without any permission; an older Android would need one, so the app's own folder is used there
-            if (Build.VERSION.SDK_INT >= 29) r.setDestinationInExternalPublicDirectory(Environment.DIRECTORY_DOWNLOADS, name);
+            if (Build.VERSION.SDK_INT >= 29) r.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
             else { r.setDestinationInExternalFilesDir(getContext(), Environment.DIRECTORY_DOWNLOADS, name); where = "app"; }
             DownloadManager dm = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
             dm.enqueue(r);
