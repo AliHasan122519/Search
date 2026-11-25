@@ -12,7 +12,7 @@ export interface DrawerItem { id: string; label: string; }
 function Thumb({ id }: { id: string }) {
   const [bad, setBad] = useState(false);
   if (bad) { const Ic = ICONS[id] ?? MoonStar; return <Ic size={20} strokeWidth={1.9} />; }
-  return <img className="drawer-thumb" src={`${(import.meta as any).env?.BASE_URL ?? './'}menu/${id}.png`} alt="" width={56} height={56} loading="eager" decoding="async" onError={() => setBad(true)} />;
+  return <img className="drawer-thumb" src={`${(import.meta as any).env?.BASE_URL ?? './'}menu/${id}.png`} alt="" width={80} height={80} loading="eager" decoding="async" onError={() => setBad(true)} />;
 }
 
 /** Button fixed at the top (the side opposite the theme button): opens the side menu. */
