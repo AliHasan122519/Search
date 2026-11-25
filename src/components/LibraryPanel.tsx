@@ -162,10 +162,30 @@ const MARKS = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g;
 /** letters of a title without vocalisation, with hamza / ya / ta marbuta folded, so that «الاحلام» finds «الأحلام» */
 const plain = (t: string) => t.replace(MARKS, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
 
+/** The books appear and fade as the list is scrolled: a tile rises into view when it enters the screen and floats away upward when it leaves at the top. Skipped when the phone asks for less motion. */
+function useReveal(panel: React.RefObject<HTMLElement>, dep: unknown) {
+  useEffect(() => {
+    const root = panel.current; if (!root || typeof IntersectionObserver === 'undefined') return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const tiles = [...root.querySelectorAll<HTMLElement>('.lib-tile')]; if (!tiles.length) return;
+    root.classList.add('reveal-on');
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const t = e.target as HTMLElement; const above = !!e.rootBounds && e.boundingClientRect.bottom <= e.rootBounds.top + 6;
+        if (e.intersectionRatio >= 0.18) { t.classList.add('seen'); t.classList.remove('gone'); }
+        else { t.classList.remove('seen'); t.classList.toggle('gone', above); }
+      }
+    }, { root, threshold: [0, 0.18, 0.5, 1] });
+    tiles.forEach((t, i) => { t.style.setProperty('--d', `${(i % 2) * 70}ms`); io.observe(t); });
+    return () => { io.disconnect(); root.classList.remove('reveal-on'); tiles.forEach((t) => t.classList.remove('seen', 'gone')); };
+  }, [panel, dep]);
+}
+
 export function LibraryPanel({ title, docs, load, onClose }: { title: string; sub?: string; docs: Doc[]; load: LoadFile; onClose: () => void }) {
   const all = useMemo(() => parse(docs), [docs]); const [open, setOpen] = useState<Book | null>(null); const [q, setQ] = useState('');
   const books = useMemo(() => { const w = plain(q).split(' ').filter(Boolean); return w.length ? all.filter((b) => { const hay = plain(`${b.title} ${b.card.author} ${b.card.authorFull} ${b.card.coverTitle}`); return w.every((x) => hay.includes(x)); }) : all; }, [all, q]);
-  const back = useRef<HTMLDivElement>(null); const close = useRef<HTMLButtonElement>(null);
+  const back = useRef<HTMLDivElement>(null); const close = useRef<HTMLButtonElement>(null); const panelRef = useRef<HTMLDivElement>(null);
+  useReveal(panelRef, books);
   const shut = useCallback(() => setOpen(null), []);
   useEffect(() => {
     close.current?.focus();
@@ -175,7 +195,7 @@ export function LibraryPanel({ title, docs, load, onClose }: { title: string; su
   }, [onClose]);
   return (
     <div ref={back} className="panel-back" onClick={onClose}>
-      <div className="panel" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
+      <div ref={panelRef} className="panel" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className="panel-head">
           <div><h2>{title}</h2><p className="panel-sub" aria-live="polite">{q.trim() ? `${books.length} من ${all.length} كتاباً` : `عدد الكتب: ${all.length}`}</p></div>
           <button type="button" ref={close} className="drawer-x" aria-label="إغلاق" onClick={onClose}><X size={20} aria-hidden="true" /></button>

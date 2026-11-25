@@ -533,3 +533,10 @@ html[data-theme="dark"] .lib-actions .lib-dl, html[data-theme="dark"] .lib-actio
 .drawer-thumb { width: 100%; height: 100%; display: block; object-fit: contain; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .45)); }
 .drawer-item { min-height: 5.9rem; }
 .drawer-item:hover .drawer-ic.drawer-ic-img { transform: scale(1.06); }
+
+/* the library list: the books rise into view and float away as the list is scrolled (only when the script marked the list; a phone that asks for less motion keeps them still) */
+.reveal-on .lib-tile { opacity: 0; transform: translateY(26px) scale(.94); transition: opacity .5s ease var(--d, 0ms), transform .55s cubic-bezier(.2, .75, .25, 1) var(--d, 0ms); will-change: opacity, transform; }
+.reveal-on .lib-tile.seen { opacity: 1; transform: none; }
+.reveal-on .lib-tile.gone { opacity: 0; transform: translateY(-20px) scale(.94); transition-duration: .35s; transition-delay: 0ms; }
+.reveal-on .lib-tile.seen:hover { transform: translateY(-3px); }
+@media (prefers-reduced-motion: reduce) { .reveal-on .lib-tile { opacity: 1; transform: none; transition: none; } }
