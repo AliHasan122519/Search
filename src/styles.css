@@ -518,3 +518,12 @@ html[data-theme="dark"] .lib-actions .lib-dl, html[data-theme="dark"] .lib-actio
 
 /* the update notice must stay visible above the assistant's full-screen home (it used to sit behind it) */
 .apk-notice { position: fixed; z-index: 50; top: calc(env(safe-area-inset-top, 0px) + 4.6rem); inset-inline: 1rem; width: auto; margin: 0 auto; padding: .5rem .9rem; font-size: .9rem; box-shadow: 0 6px 24px -8px rgba(0, 0, 0, .45); }
+
+/* scanned editions: one card per edition, read and download side by side (no repeated long buttons) */
+.lib-eds { display: grid; gap: .6rem; margin: .2rem 0; }
+.lib-eds .dream-label { margin: .2rem 0 0; }
+.lib-ed { display: grid; gap: .55rem; padding: .7rem; border-radius: .9rem; border: 1px solid var(--border); background: var(--card); }
+.lib-ed-t { display: grid; gap: .1rem; text-align: center; font-weight: 700; line-height: 1.5; color: var(--ink); }
+.lib-ed-t small { font-size: .75rem; font-weight: 600; color: var(--muted-foreground); }
+.lib-ed-b { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.lib-ed-b .go:only-child { grid-column: 1 / -1; }

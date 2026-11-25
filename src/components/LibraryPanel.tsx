@@ -62,6 +62,9 @@ function BookDetail({ book, load, onClose }: { book: Book; load: LoadFile; onClo
     const buf = await load(textFile); if (!buf) throw new Error('تعذّر فتح نص الكتاب');
     return saveTextFile(fileName(`${book.title} - ${c.author}`, 'txt'), textOf(book.title, c, parseJson<BookData>(buf)));
   });
+  /** one entry per scanned edition (a copy listed twice with the same file is shown once): read and download sit together on its row instead of two long lists that repeat the same words */
+  const eds = (() => { const seen = new Set<string>(); return c.dls.map((d, i) => ({ d, i, canRead: !(d.view === false || (c.reader.mode === 'embed' && !c.reader.text && c.reader.id === d.id)) })).filter(({ d }) => (seen.has(d.url) ? false : (seen.add(d.url), true))); })();
+  const getPdf = (i: number) => dl('d' + i, () => downloadFile(c.dls[i].url, fileName(`${book.title} - ${c.author}${c.dls.length > 1 ? ' (' + (i + 1) + ')' : ''}`, 'pdf')));
   const entries = all ? c.toc : c.toc.slice(0, SHOWN);
   const openAt = (e: BookCard['toc'][number]) => (c.reader.mode === 'embed' && c.reader.text ? setRead({ at: e[4] ?? null }) : setRead({ at: e[2] }));
   return (
@@ -77,11 +80,24 @@ function BookDetail({ book, load, onClose }: { book: Book; load: LoadFile; onClo
         </div>
         <div className="lib-actions">
           <button type="button" className="go lib-read" onClick={() => setRead({ at: null })}><BookOpen size={18} aria-hidden="true" />{textFile ? 'قراءة الكتاب المفرَّغ' : 'قراءة داخل التطبيق'}</button>
-          {c.dls.map((d, i) => (d.view === false || (c.reader.mode === 'embed' && !c.reader.text && c.reader.id === d.id) ? null : (
-            <button type="button" key={'s' + i} className="go lib-scan" onClick={() => setScan(i)}><Images size={18} aria-hidden="true" />قراءة الكتاب المصوَّر{c.dls.length > 1 && <small>{d.label.replace(/\s*\(PDF\)/, '')}</small>}</button>)))}
-          {c.dls.map((d, i) => (
-            <button type="button" key={i} className="go lib-dl" disabled={!!busy} onClick={() => dl('d' + i, () => downloadFile(d.url, fileName(`${book.title} - ${c.author}${c.dls.length > 1 ? ' (' + (i + 1) + ')' : ''}`, 'pdf')))}><Download size={18} aria-hidden="true" />{busy === 'd' + i ? 'جارٍ البدء…' : 'تحميل الكتاب المصوَّر'}<small>{c.dls.length > 1 ? `${d.label.replace(/\s*\(PDF\)/, '')} · ` : ''}{d.size}</small></button>
-          ))}
+          {eds.length === 1 && (<>
+            {eds[0].canRead && <button type="button" className="go lib-scan" onClick={() => setScan(eds[0].i)}><Images size={18} aria-hidden="true" />قراءة الكتاب المصوَّر</button>}
+            <button type="button" className="go lib-dl" disabled={!!busy} onClick={() => getPdf(eds[0].i)}><Download size={18} aria-hidden="true" />{busy === 'd' + eds[0].i ? 'جارٍ البدء…' : 'تحميل الكتاب المصوَّر'}<small>{eds[0].d.size}</small></button>
+          </>)}
+          {eds.length > 1 && (
+            <div className="lib-eds" role="group" aria-label="النسخ المصوَّرة">
+              <h3 className="dream-label">النسخ المصوَّرة ({toAr(eds.length)})</h3>
+              {eds.map(({ d, i, canRead }) => (
+                <div className="lib-ed" key={i}>
+                  <div className="lib-ed-t">{d.label.replace(/\s*\(PDF\)/, '')}<small>{d.size}</small></div>
+                  <div className="lib-ed-b">
+                    {canRead && <button type="button" className="go lib-scan" onClick={() => setScan(i)}><Images size={18} aria-hidden="true" />قراءة</button>}
+                    <button type="button" className="go lib-dl" disabled={!!busy} onClick={() => getPdf(i)}><Download size={18} aria-hidden="true" />{busy === 'd' + i ? 'جارٍ البدء…' : 'تحميل'}</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           {textFile && (
             <button type="button" className="go lib-dl lib-txt" disabled={!!busy} onClick={saveTxt}><FileText size={18} aria-hidden="true" />{busy === 'txt' ? 'جارٍ الحفظ…' : 'تحميل الكتاب المفرَّغ'}</button>
           )}
