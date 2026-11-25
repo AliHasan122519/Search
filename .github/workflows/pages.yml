@@ -27,7 +27,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - name: بناء الموقع (بكل ميزاته: المحتوى والمساعد ونموذج الفهم)
+      - name: "بناء الموقع بكل ميزاته (المحتوى والمساعد ونموذج الفهم)"
         run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
