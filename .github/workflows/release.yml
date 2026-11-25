@@ -15,21 +15,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
+  check:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    outputs:
+      ok: ${{ steps.k.outputs.ok }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: التحقق من مفتاح التوقيع
+      - id: k
+        name: التحقق من مفتاح التوقيع
         env:
           KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           if [ -z "$KS" ] || [ -z "$PW" ]; then
-            echo "::error::أضف السرّين ANDROID_KEYSTORE_BASE64 و ANDROID_KEYSTORE_PASSWORD في Settings > Secrets and variables > Actions (القيم في ملف github-secrets.txt)"
-            exit 1
+            echo "::notice::لا يُبنى ملف التطبيق آليًا بعد: أضف السرّين ANDROID_KEYSTORE_BASE64 و ANDROID_KEYSTORE_PASSWORD في Settings > Secrets and variables > Actions"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
           fi
+
+  release:
+    needs: check
+    if: needs.check.outputs.ok == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
