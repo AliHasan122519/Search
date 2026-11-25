@@ -15,8 +15,12 @@ for i, (p, s) in enumerate(vocab):
     if i < 4: continue
     core = p.replace('▁', '')
     if AR.search(p): keep.append(i)
-    elif core and len(core) <= 1 and ok_char(core): keep.append(i)
+    elif p == '▁' or (core and len(core) <= 1 and ok_char(core)): keep.append(i)   # the bare word mark and every single character
     elif re.fullmatch(r'▁?[A-Za-z0-9]{1,3}', p): keep.append(i)
+# the two fixed prefixes of the e5 models («query: » / «passage: ») must tokenize exactly as in the full model
+from tokenizers import Tokenizer
+_t = Tokenizer.from_file(f'{src}/tokenizer.json')
+for pre in ('query: ', 'passage: '): keep += _t.encode(pre).ids
 keep = sorted(set(keep)); print('kept pieces', len(keep))
 m = onnx.load(f'{src}/onnx/model_quantized.onnx')
 for init in m.graph.initializer:

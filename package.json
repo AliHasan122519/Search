@@ -8,10 +8,11 @@
     "dev": "node scripts/sync_content.mjs && vite",
     "build": "node scripts/sync_content.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node tests/chat.mjs && node tests/assistant-chat.mjs",
+    "test": "node tests/chat.mjs && node tests/assistant-chat.mjs && node tests/understanding.mjs",
     "build:android": "node scripts/sync_content.mjs && tsc --noEmit && vite build --mode android && cap sync android",
     "content:validate": "node scripts/validate_content.mjs",
-    "build:ios": "node scripts/sync_content.mjs && tsc --noEmit && vite build --mode ios && cap sync ios"
+    "build:ios": "node scripts/sync_content.mjs && tsc --noEmit && vite build --mode ios && cap sync ios",
+    "build:ai": "python3 scripts/build_semantic.py <model-dir> public/ai && node scripts/build_vectors.mjs public/ai"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.1",
@@ -19,7 +20,8 @@
     "@capacitor/ios": "^6.2.3",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "onnxruntime-web": "^1.20.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.2.1",

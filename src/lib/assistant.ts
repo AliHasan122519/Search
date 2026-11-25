@@ -8,6 +8,7 @@
 import { normalize, tokens, queryStem } from './arabic';
 import { dialectVariants } from './dialect';
 import { smalltalk, type Social } from './chat';
+import type { Understanding } from './understand';
 import type { Doc, Lookup } from './types';
 import { classify, tierOf, gather, matchTopic, parseTopics, TIER_LABEL, TIER_ORDER, searchDocs, type Evidence, type Intent, type Tier, type Topic } from './discuss';
 
@@ -36,10 +37,12 @@ export type Open = { kind: 'text'; book: string; para: number } | { kind: 'scan'
 export interface Card { title: string; where: string; quote: string; open: Open[]; tier?: Tier; }
 export interface Reply { text: string; cards: Card[]; chips: string[]; after?: string; }
 export interface Ctx {
-  engine: { lookup(src: string, q: string): Lookup; has(src: string): boolean } | null;
+  engine: { lookup(src: string, q: string): Lookup; has(src: string): boolean; docsOf(src: string): Doc[] } | null;
   books: BookMeta[]; people: Doc[]; phrases: Record<string, string[]>; lists?: Record<string, Doc[]>;
   loadBook(b: BookMeta): Promise<BookText | null>;
   rng?: () => number; onStatus?: (s: string) => void;
+  /** the on-device understanding (neural model); absent until it has started, and for ever if the phone cannot run it */
+  semantic?: Understanding | null;
 }
 export interface Memory { query: string; cards: Card[]; shown: number; topic?: Topic; narrate?: string[]; }
 
@@ -51,6 +54,8 @@ const STOP = new Set(('وش ايش شنو شو ليش لماذا كيف متى �
 const CONTEXT = new Set('منام منامات منامي منامه حلم احلام حلمي حلمه رويا رويه رويتي رويتك نوم نومي'.split(' '));
 const TITLE_STOP = new Set('كتاب في علم من الى على عن و ال بين'.split(' '));
 const STRUCT = new Set('فهرس فهرست الفهرس فصل فصول الفصل باب ابواب الباب مقاله مقالات مبحث مباحث وحده محتويات المحتويات عناوين عنوان'.split(' ').map((w) => normalize(w)));
+/** how close in meaning (cosine) a dictionary word must be to count, and how far below the best one it may be */
+const SEM_MIN = 0.80; const SEM_BAND = 0.015; const SEM_HEADS = 2;
 const dreamWords = /رؤيا|رويا|حلم|احلام|منام|شفت|رايت|حلمت/;
 const GREET = new Set('سلام السلام عليكم ورحمه الله وبركاته هلا هلا والله اهلا اهلين مرحبا مرحبتين يا حياك حياكم حيا هاي صباح مساء الخير النور النورين كيفك كيف حالك حالكم شلونك علومك اخبارك وش اخبارك'.split(' ').map((w) => normalize(w)));
 const THANKS = /شكرا|مشكور|يعطيك العافيه|الله يعافيك|جزاك|تسلم|يسلمو|بارك الله|ما قصرت|كفو|الله يحفظك على/;
@@ -375,9 +380,24 @@ export class Assistant {
   }
 
   /** a narrated dream: what the books say of each thing the dreamer names (the dictionary of the symbols), then the rule that the reading depends on the dreamer's state, and a question about it */
+  /** dictionary cards for the words nearest in MEANING to the question (empty when the understanding is absent, or the question is not about dreams / the books) */
+  private async semCards(q: Q, limit: number, agree?: Set<string>): Promise<{ cards: Card[]; ids: Set<string>; heads: string[] }> {
+    const out = { cards: [] as Card[], ids: new Set<string>(), heads: [] as string[] }; const ctx = this.ctx;
+    if (!ctx.semantic?.ready || !ctx.engine?.has('books')) return out;
+    const sem = await ctx.semantic.find(q.raw, 5).catch(() => []); const top = sem[0]?.score ?? 0; const dict = ctx.engine.docsOf('books'); const keys = new Set(q.content.flatMap(keysOf));
+    // a word that the words of the question ALSO found comes first (both ways of searching agree on it)
+    const near = sem.filter((m) => m.score >= SEM_MIN && m.score >= top - SEM_BAND); if (agree?.size) near.sort((a, b) => Number(agree.has(bare(b.head))) - Number(agree.has(bare(a.head))));
+    for (const m of near) {
+      if (out.heads.length >= limit) continue;
+      const docs = m.rows.map((i) => dict[i]).filter((d) => d && d.text).slice(0, 2); if (!docs.length) continue; out.heads.push(m.head);
+      for (const d of docs) { if (out.ids.has(d.id)) continue; out.ids.add(d.id); out.cards.push({ title: d.ref || m.head, where: d.source ?? 'الكتب', quote: snippet(d.text, keys), open: [] }); }
+    }
+    return out;
+  }
   private async symbolCards(q: Q): Promise<{ cards: Card[]; syms: string[] }> {
     const eng = this.ctx.engine; const cards: Card[] = []; const syms: string[] = []; if (!eng?.has('books')) return { cards, syms };
-    const ws = [...new Set(q.content.filter((w) => !NARR_STOP.has(w) && !NARR_STOP.has(queryStem(w)) && !dreamWords.test(w)))].sort((a, b) => b.length - a.length).slice(0, 7); const seen = new Set<string>();
+    const ws = [...new Set(q.content.filter((w) => !NARR_STOP.has(w) && !NARR_STOP.has(queryStem(w)) && !dreamWords.test(w)))].sort((a, b) => b.length - a.length).slice(0, 7);
+    const sc = await this.semCards(q, 2); cards.push(...sc.cards); syms.push(...sc.heads); const seen = new Set<string>(sc.ids);
     for (const w of ws) {
       if (cards.length >= 4) break;
       try { let word = w; let r = w.length > 3 && w.startsWith('و') ? eng.lookup('books', w.slice(1)).results.find((x) => x.group === 'meaning') : undefined; if (r) word = w.slice(1); else r = eng.lookup('books', w).results.find((x) => x.group === 'meaning'); if (!r || seen.has(r.doc.id)) continue; seen.add(r.doc.id); syms.push(word); cards.push({ title: r.doc.ref || word, where: r.doc.source ?? 'الكتب', quote: snippet(r.doc.text, new Set(keysOf(word))), open: [], tier: 'books' }); } catch { /* nothing for this word */ }
@@ -449,7 +469,11 @@ export class Assistant {
     // 1) the dictionary of the symbols of the books tab
     if (isDream && !named.length && ctx.engine?.has('books')) {
       try {
-        let mean = ctx.engine.lookup('books', sym).results.filter((r) => r.group === 'meaning').slice(0, 4);
+        // what the question MEANS (the neural model): the dictionary words closest in meaning come first, then what the words themselves found
+        const lexAll = ctx.engine.lookup('books', sym).results.filter((r) => r.group === 'meaning');
+        const sc = await this.semCards(q, SEM_HEADS, new Set(lexAll.map((r) => bare(r.doc.ref ?? '')))); const semCards = sc.cards; const semSeen = sc.ids;
+        cards.push(...semCards);
+        let mean = lexAll.filter((r) => !semSeen.has(r.doc.id)).slice(0, semCards.length ? 2 : 4);
         if (!mean.length && sym.includes(' ')) for (const w of [...sym.split(' ')].sort((a, b) => b.length - a.length)) { mean = ctx.engine.lookup('books', w).results.filter((r) => r.group === 'meaning').slice(0, 4); if (mean.length) break; }
         for (const r of mean) cards.push({ title: r.doc.ref || sym, where: r.doc.source ?? 'الكتب', quote: snippet(r.doc.text, new Set(words.flatMap(keysOf))), open: [] });
       } catch { /* the engine has nothing for it */ }

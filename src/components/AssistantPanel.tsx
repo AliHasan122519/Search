@@ -3,6 +3,7 @@ import { X, Send, BookOpen, Images } from 'lucide-react';
 import type { Doc } from '../lib/types';
 import type { Engine } from '../lib/engine';
 import { parseJson } from '../lib/data';
+import type { Understanding } from '../lib/understand';
 import { Assistant, parseBooks, type BookMeta, type BookText, type Card, type Open, type Reply } from '../lib/assistant';
 import { TIER_LABEL } from '../lib/discuss';
 import { BookReader } from './BookReader';
@@ -17,8 +18,16 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
   const books = useMemo(() => [...parseBooks(lists.kutubtabir ?? [], 'kutubtabir'), ...parseBooks(lists.nazm ?? [], 'nazm'), ...parseBooks(lists.kutubfiras ?? [], 'kutubfiras')], [lists]);
   const bank = useMemo(() => { const m: Record<string, string[]> = {}; for (const d of phrases) if (d.ref) (m[d.ref] ??= []).push(d.text); return m; }, [phrases]);
   const [status, setStatus] = useState('');
+  // the understanding (open-source neural model, on the phone) starts in the background a moment after the app opens; until it is ready (or if the phone cannot run it) سراج searches by words alone
+  const sem = useRef<Understanding | null>(null);
+  useEffect(() => {
+    if (!home) return; let dead = false; const mem = (navigator as { deviceMemory?: number }).deviceMemory;
+    if (mem !== undefined && mem < 3) return;                                                  // a phone with little memory keeps the lighter search
+    const t = window.setTimeout(() => { void import('../lib/understand').then(({ Understood }) => Understood.start((import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? './')).then((u) => { if (u && !dead) sem.current = u; }); }, 2500);
+    return () => { dead = true; window.clearTimeout(t); };
+  }, [home]);
   const bot = useMemo(() => new Assistant({
-    engine, books, people: lists.muabbirun ?? [], phrases: bank, lists, onStatus: setStatus,
+    engine, books, people: lists.muabbirun ?? [], phrases: bank, lists, onStatus: setStatus, get semantic() { return sem.current; },
     loadBook: async (b: BookMeta) => { if (!b.textFile) return null; const buf = await load(b.textFile); return buf ? parseJson<BookText>(buf) : null; },
   }), [engine, books, lists, bank, load]);
   const [msgs, setMsgs] = useState<Msg[]>([]); const [q, setQ] = useState(''); const [busy, setBusy] = useState(false);
