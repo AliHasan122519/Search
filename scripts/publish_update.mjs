@@ -11,6 +11,6 @@ if (!code || !base) { console.error('versionCode or VITE_CONTENT_URL not found')
 mkdirSync(join(repo, 'apk'), { recursive: true }); mkdirSync(join(repo, 'content'), { recursive: true });
 copyFileSync(apk, join(repo, 'apk', 'almaktaba.apk'));
 const manifest = JSON.parse(readFileSync('content/manifest.json', 'utf8'));
-manifest.apk = { versionCode: code, url: `${base}apk/almaktaba.apk?v=${code}`, ...(notes ? { notes } : {}) };
+manifest.apk = { versionCode: code, url: `${base}apk/almaktaba.apk?v=${code}` };
 writeFileSync(join(repo, 'content', 'manifest.json'), JSON.stringify(manifest, null, 1) + '\n');
 console.log('published versionCode', code, '→', manifest.apk.url);

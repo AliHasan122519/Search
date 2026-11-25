@@ -74,7 +74,7 @@ jobs:
           URL="https://github.com/${{ github.repository }}/releases/download/v$VC/almaktaba.apk"
           NOTES="$NOTES" URL="$URL" node -e '
             const fs = require("fs"); const m = JSON.parse(fs.readFileSync("content/manifest.json", "utf8"));
-            m.apk = { versionCode: Number(process.env.VC), url: process.env.URL, notes: process.env.NOTES };
+            m.apk = { versionCode: Number(process.env.VC), url: process.env.URL };
             fs.writeFileSync("content/manifest.json", JSON.stringify(m, null, 1) + "\n");'
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

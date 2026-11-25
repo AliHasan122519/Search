@@ -12,14 +12,45 @@ import { ScanPages, type OwnToc } from './ScanPages';
 
 interface BookCard {
   kind: string; era: string; author: string; authorFull: string; coverTitle: string; cover: { p: number; m: number; img?: string };
-  info: [string, string][]; infoSrc: string; about: { t: string; s: string }[]; note: string; inApp: boolean;
+  info: [string, string][]; infoSrc: string; noRead?: boolean; about: { t: string; s: string }[]; note: string; inApp: boolean;
   reader: { mode: 'text'; file: string; src: string; ocr: boolean; scan: string; count: number } | { mode: 'embed'; id: string; src: string; manuscript?: boolean; text?: { file: string; count: number; src: string; scanId?: string } };
   toc: [number, string, number | null, (number | null)?, number?][]; tocSrc: string;
   dls: { label: string; url: string; size: string; id: string; sub?: string; view?: boolean; own?: { dir: string; n: number; toc: OwnToc } }[];
 }
 interface Book { id: string; title: string; card: BookCard; }
 export type LoadFile = (rel: string) => Promise<ArrayBuffer | null>;
-const parse = (docs: Doc[]): Book[] => docs.flatMap((d) => { try { const c = JSON.parse(d.extra ?? '') as BookCard; return c?.reader && c.toc ? [{ id: d.id, title: d.ref ?? '', card: c }] : []; } catch { return []; } });
+type Dl = BookCard['dls'][number];
+/** the label names a volume / part of one edition («المجلد الأول»، «الجزء الثاني») and not a different edition */
+const isVolume = (l: string) => /(?:^|\s)(?:ال)?(?:مجلد|جزء|مج|ج)\s*(?:ال)?(?:\d|أول|اول|ثان|ثالث|رابع|خامس|سادس|سابع|ثامن|تاسع|عاشر)/.test(l) || /^(?:ال)?(?:مجلد|جزء)\b/.test(l.trim());
+/** where a file is opened (the source item, and its file when the item holds several) */
+const dlKey = (q: Dl) => (q.sub ? `${q.id}/${q.sub}` : q.id);
+const editionName = (l: string) => l.replace(/\s*\(PDF\)\s*$/, '').replace(/^نسخة\s+/, '').trim();
+/** «بتحقيق فلان» / «تحقيق فلان» when the edition's name says who edited it */
+const editor = (name: string) => { const m = /(?:بتحقيق|تحقيق)\s+(.+?)(?:\s*[()،,]|$)/.exec(name); return m ? `تحقيق ${m[1].trim()}` : undefined; };
+
+/** One book of the content becomes one book of the list PER EDITION: every different printed edition (a different file at the source, e.g. each editor's verification) stands on its own,
+ *  with its own page, cover, files and buttons. The volumes / parts of one edition (the same source file, listed under «المجلد الأول»، «الجزء الثاني»…) stay together in their book.
+ *  The first edition keeps the book's own cover, contents and transcribed text (they were made from it); the others open their scanned pages and download. Nothing here names a book: it follows the data. */
+function split(id: string, title: string, c: BookCard): Book[] {
+  const groups = new Map<string, Dl[]>(); for (const q of c.dls) { const k = q.sub && !isVolume(q.label) ? dlKey(q) : q.id; groups.set(k, [...(groups.get(k) ?? []), q]); }
+  if (groups.size < 2) return [{ id, title, card: c }];
+  const ids = [...groups.keys()];
+  const mine = c.reader.mode === 'text' ? c.reader.scan : (c.reader.text?.scanId ?? c.reader.id);
+  const first = ids.find((g) => g === mine || g.split('/')[0] === mine) ?? ids[0];
+  const cores = new Map(ids.map((g) => [g, editionName(groups.get(g)![0].label).replace(/\s*\([^)]*\)\s*$/, '')]));
+  const info = (g: string) => c.info.filter(([k]) => ![...cores].some(([o, core]) => o !== g && core.length > 5 && k.includes(core)));
+  return [first, ...ids.filter((g) => g !== first)].map((g, n) => {
+    const dls = groups.get(g)!;
+    if (n === 0) return { id, title, card: { ...c, dls, info: info(g) } };
+    const name = editionName(dls[0].label); const who = editor(name); const viewable = dls.some((q) => q.view !== false);
+    return {
+      id: `${id}~${n}`, title: `${title} — ${name}`,
+      card: { ...c, dls, info: info(g), toc: [], tocSrc: '', inApp: false, noRead: !viewable, coverTitle: `${c.coverTitle} (${who ?? name.slice(0, 40)})`, cover: { p: (c.cover.p + n) % 10, m: (c.cover.m + n) % 8 },
+        reader: { mode: 'embed' as const, id: g, src: c.reader.src } },
+    };
+  });
+}
+const parse = (docs: Doc[]): Book[] => docs.flatMap((d) => { try { const c = JSON.parse(d.extra ?? '') as BookCard; return c?.reader && c.toc ? split(d.id, d.ref ?? '', c) : []; } catch { return []; } });
 const SHOWN = 14;
 
 /** the picture of the printed cover (a content file, opened on demand and kept by the app) as an address the page can show; nothing until it is read, so the drawn cover is shown meanwhile */
@@ -63,7 +94,7 @@ function BookDetail({ book, load, onClose }: { book: Book; load: LoadFile; onClo
     return saveTextFile(fileName(`${book.title} - ${c.author}`, 'txt'), textOf(book.title, c, parseJson<BookData>(buf)));
   });
   /** one entry per scanned edition (a copy listed twice with the same file is shown once): read and download sit together on its row instead of two long lists that repeat the same words */
-  const eds = (() => { const seen = new Set<string>(); return c.dls.map((d, i) => ({ d, i, canRead: !(d.view === false || (c.reader.mode === 'embed' && !c.reader.text && c.reader.id === d.id)) })).filter(({ d }) => (seen.has(d.url) ? false : (seen.add(d.url), true))); })();
+  const eds = (() => { const seen = new Set<string>(); return c.dls.map((d, i) => ({ d, i, canRead: !(d.view === false || (c.reader.mode === 'embed' && !c.reader.text && c.reader.id === dlKey(d))) })).filter(({ d }) => (seen.has(d.url) ? false : (seen.add(d.url), true))); })();
   const getPdf = (i: number) => dl('d' + i, () => downloadFile(c.dls[i].url, fileName(`${book.title} - ${c.author}${c.dls.length > 1 ? ' (' + (i + 1) + ')' : ''}`, 'pdf')));
   const entries = all ? c.toc : c.toc.slice(0, SHOWN);
   const openAt = (e: BookCard['toc'][number]) => (c.reader.mode === 'embed' && c.reader.text ? setRead({ at: e[4] ?? null }) : setRead({ at: e[2] }));
@@ -79,14 +110,14 @@ function BookDetail({ book, load, onClose }: { book: Book; load: LoadFile; onClo
           <div className="lib-chips"><span className="lib-chip">{c.kind}</span><span className="lib-chip">{c.era}</span>{c.inApp && <span className="lib-chip lib-chip-app">من مراجع تبويب «الكتب»</span>}</div>
         </div>
         <div className="lib-actions">
-          <button type="button" className="go lib-read" onClick={() => setRead({ at: null })}><BookOpen size={18} aria-hidden="true" />{textFile ? 'قراءة الكتاب المفرَّغ' : 'قراءة داخل التطبيق'}</button>
+          {!c.noRead && <button type="button" className="go lib-read" onClick={() => setRead({ at: null })}><BookOpen size={18} aria-hidden="true" />{textFile ? 'قراءة الكتاب المفرَّغ' : 'قراءة داخل التطبيق'}</button>}
           {eds.length === 1 && (<>
             {eds[0].canRead && <button type="button" className="go lib-scan" onClick={() => setScan(eds[0].i)}><Images size={18} aria-hidden="true" />قراءة الكتاب المصوَّر</button>}
             <button type="button" className="go lib-dl" disabled={!!busy} onClick={() => getPdf(eds[0].i)}><Download size={18} aria-hidden="true" />{busy === 'd' + eds[0].i ? 'جارٍ البدء…' : 'تحميل الكتاب المصوَّر'}<small>{eds[0].d.size}</small></button>
           </>)}
           {eds.length > 1 && (
-            <div className="lib-eds" role="group" aria-label="النسخ المصوَّرة">
-              <h3 className="dream-label">النسخ المصوَّرة ({toAr(eds.length)})</h3>
+            <div className="lib-eds" role="group" aria-label="المجلدات المصوَّرة">
+              <h3 className="dream-label">المجلدات المصوَّرة ({toAr(eds.length)})</h3>
               {eds.map(({ d, i, canRead }) => (
                 <div className="lib-ed" key={i}>
                   <div className="lib-ed-t">{d.label.replace(/\s*\(PDF\)/, '')}<small>{d.size}</small></div>

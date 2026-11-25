@@ -21,7 +21,7 @@ export function UpdateDialog({ apk, onClose }: { apk: { versionCode: number; url
         <div className="modal-ic" aria-hidden="true"><RefreshCw size={26} /></div>
         <h2 id="upd-title">يتوفر تحديث جديد</h2>
         <p id="upd-desc" className="modal-p">
-          {phase === 'idle' && <>هناك إصدار أحدث من التطبيق{apk.notes ? ` — ${apk.notes}` : ''}. اضغط «تحديث الآن» لتنزيله وتثبيته فوق النسخة الحالية، وتبقى بياناتك كما هي.</>}
+          {phase === 'idle' && <>اضغط «تحديث الآن» لتنزيله وتثبيته.</>}
           {phase === 'downloading' && <>جارٍ تنزيل التحديث… {toAr(pct)}%</>}
           {phase === 'installing' && <>اكتمل التنزيل. اضغط «تثبيت» في النافذة التي ظهرت من النظام.</>}
           {phase === 'needs_permission' && <>اسمح للتطبيق بتثبيت التحديثات من الإعدادات التي فُتحت، ثم ارجع واضغط «تحديث الآن» مرة أخرى.</>}

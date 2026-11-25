@@ -1193,8 +1193,7 @@
   }
  ],
  "apk": {
-  "versionCode": 6,
-  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=6",
-  "notes": "ترتيب خيارات الكتب: نسخة واحدة لكل طبعة مصوّرة بزرّي قراءة وتحميل"
+  "versionCode": 7,
+  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=7"
  }
 }
