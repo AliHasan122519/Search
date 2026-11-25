@@ -283,7 +283,7 @@ export class Assistant {
     return this.reply(this.say('guide_intro', { dom: domText, lvl: lvlText }), cards, chips, this.say('guide_note'));
   }
 
-  private suggestions(): string[] { return ['وش فسّروا رؤية الثعبان؟', 'مين ابن سيرين؟', 'كم صفحة كتاب المرقبة العليا؟', 'دوّر لي فصل الصداقة في كتاب الأخلاق والسير']; }
+  private suggestions(): string[] { return ['وش فسّروا رؤية الثعبان؟', 'مين ابن سيرين؟', 'كم صفحة كتاب المرقبة العليا؟', 'فهرس كتاب المنامات']; }
 
   private library(): Reply {
     const t = this.ctx.books.filter((b) => b.list === 'kutubtabir').length, z = this.ctx.books.filter((b) => b.list === 'nazm').length, f = this.ctx.books.length - t - z;

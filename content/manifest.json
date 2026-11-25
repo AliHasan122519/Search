@@ -1,14 +1,14 @@
 {
  "schema": 1,
- "version": 493,
- "updated": "2026-11-25T23:04:14Z",
+ "version": 494,
+ "updated": "2026-11-25T23:50:26Z",
  "tabs": [
   {
    "id": "assistant",
    "label": "سراج",
    "kind": "generic",
    "file": "assistant.json",
-   "sha256": "a3aa3d2f42a7c5ff00d3daa6a5e9e3d01774ff0138d6bcf2bf77d3290ccd389e",
+   "sha256": "7e2dd5ef4099ed4218c10d6edbe46671b3cae373bdcd43c83c5464899eb8cd6e",
    "count": 246,
    "drawer": true,
    "card": "assistant",
