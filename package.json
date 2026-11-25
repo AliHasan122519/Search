@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "description": "المكتبة الشاملة: المساعد الذكي وكتب التعبير ونظمه وكتب الفراسة وقواعد التعبير",
+  "description": "المكتبة الشاملة: سراج وكتب التعبير ونظمه وكتب الفراسة وقواعد التعبير",
   "scripts": {
     "dev": "node scripts/sync_content.mjs && vite",
     "build": "node scripts/sync_content.mjs && tsc --noEmit && vite build",

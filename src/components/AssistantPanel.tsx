@@ -62,11 +62,11 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
     <div ref={back} className={home ? 'as-home' : 'panel-back'} onClick={home ? undefined : onClose}>
       <div className={home ? 'panel as-panel as-home-panel' : 'panel as-panel'} role={home ? 'main' : 'dialog'} aria-modal="true" aria-label={title} style={view ? { height: view.h, transform: `translateY(${view.top}px)` } : undefined} onClick={(e) => e.stopPropagation()}>
         <div className="panel-head">
-          <div><h2>{title}</h2>{home && <p className="panel-sub">المساعد الذكي</p>}</div>
+          <div><h2>{title}</h2></div>
           {!home && <button type="button" className="drawer-x" aria-label="إغلاق" onClick={onClose}><X size={20} aria-hidden="true" /></button>}
         </div>
         <div ref={chat} className="as-chat" role="log" aria-live="polite" aria-label="المحادثة">
-          {!ready && <p className="drawer-empty">المساعد غير متاح حالياً.</p>}
+          {!ready && <p className="drawer-empty">سراج غير متاح حالياً.</p>}
           {msgs.map((m) => (
             <div key={m.id} data-m={m.id} className={`as-msg as-${m.who}`}>
               <p className="as-text" dir="rtl">{m.text}</p>
@@ -85,7 +85,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
               {m.chips && m.chips.length > 0 && <div className="as-chips">{m.chips.map((c) => <button key={c} type="button" className="as-chip" disabled={busy} onClick={() => send(c)}>{c}</button>)}</div>}
             </div>
           ))}
-          {busy && <div className="as-msg as-bot as-typing" aria-label="المساعد يكتب"><span /><span /><span />{status && <em>{status}</em>}</div>}
+          {busy && <div className="as-msg as-bot as-typing" aria-label="سراج يكتب"><span /><span /><span />{status && <em>{status}</em>}</div>}
           <div ref={end} />
         </div>
         <form className="as-form" onSubmit={(e) => { e.preventDefault(); send(q); }}>

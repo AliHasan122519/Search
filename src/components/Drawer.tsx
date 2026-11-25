@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent as RTouchEvent } from 'react';
 import { Menu, X, MoonStar, CloudMoon, Sparkles, BookUser, Scale, GitCompareArrows, ScrollText, Info, ChevronLeft, LibraryBig, Eye, Feather } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -7,6 +7,13 @@ import type { LucideIcon } from 'lucide-react';
 const ICONS: Record<string, LucideIcon> = { ruaa: CloudMoon, anbiya: Sparkles, muabbirun: BookUser, qawaid: Scale, muqaranat: GitCompareArrows, ruyahadith: ScrollText, kutubtabir: LibraryBig, nazm: Feather, kutubfiras: Eye, about: Info };
 
 export interface DrawerItem { id: string; label: string; }
+
+/** the menu thumbnail of a section (public/menu/<id>.png, drawn for the section); a section without one keeps its small line icon */
+function Thumb({ id }: { id: string }) {
+  const [bad, setBad] = useState(false);
+  if (bad) { const Ic = ICONS[id] ?? MoonStar; return <Ic size={20} strokeWidth={1.9} />; }
+  return <img className="drawer-thumb" src={`${(import.meta as any).env?.BASE_URL ?? './'}menu/${id}.png`} alt="" width={56} height={56} loading="eager" decoding="async" onError={() => setBad(true)} />;
+}
 
 /** Button fixed at the top (the side opposite the theme button): opens the side menu. */
 export function MenuButton({ open, onClick }: { open: boolean; onClick: () => void }) {
@@ -60,7 +67,7 @@ export function Drawer({ open, items, onPick, onClose }: { open: boolean; items:
         <nav className="drawer-list" aria-label="أقسام المزيد">
           {items.map((it) => (
             <button type="button" key={it.id} className="drawer-item" onClick={() => onPick(it.id)}>
-              <span className="drawer-ic" aria-hidden="true">{(() => { const Ic = ICONS[it.id] ?? MoonStar; return <Ic size={20} strokeWidth={1.9} />; })()}</span>
+              <span className="drawer-ic drawer-ic-img" aria-hidden="true"><Thumb id={it.id} /></span>
               <span className="drawer-label">{it.label}</span>
               <ChevronLeft className="drawer-go" size={20} aria-hidden="true" />
             </button>

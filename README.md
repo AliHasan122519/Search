@@ -1,6 +1,6 @@
 # المكتبة الشاملة
 
-تطبيق أندرويد (`com.alboheth.assistant`): المساعد الذكي وكتب علم التعبير ونظمه وكتب الفراسة وقواعد التعبير.
+تطبيق أندرويد (`com.alboheth.assistant`): سراج وكتب علم التعبير ونظمه وكتب الفراسة وقواعد التعبير.
 
 **التنزيل المباشر لأول مرة:** [آخر إصدار](../../releases/latest/download/almaktaba.apk)
 (قبل أول نشر آلي: [الإصدار الحالي](https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk))
