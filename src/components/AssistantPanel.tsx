@@ -11,7 +11,6 @@ import { BookEmbed } from './BookEmbed';
 import { topmost } from './DreamsPanel';
 
 type Msg = { id: number; who: 'me' | 'bot'; text: string; cards?: Card[]; chips?: string[]; after?: string };
-const FIRST = ['وش فسّروا رؤية الماء؟', 'مين ابن سيرين؟', 'كم صفحة كتاب المرقبة العليا؟', 'دوّر لي فصل الصداقة في كتاب الأخلاق والسير'];
 
 /** The assistant of the app: a chat that answers only from the references the app holds (see lib/assistant.ts). Every answer shows where it comes from and opens the book at that place. */
 export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClose, home }: { home?: boolean; title: string; sub?: string; phrases: Doc[]; lists: Record<string, Doc[]>; engine: Engine; load: (rel: string) => Promise<ArrayBuffer | null>; onClose: () => void }) {
@@ -54,7 +53,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
   useEffect(() => { const t = [0, 90, 300, 700].map((d) => window.setTimeout(settle, d)); const r = requestAnimationFrame(settle); return () => { t.forEach(clearTimeout); cancelAnimationFrame(r); }; }, [msgs, busy, view, settle]);
   useEffect(() => {
     if (!ready || msgs.length) return;
-    Promise.resolve(bot.intro()).then((r) => { last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text, chips: FIRST }]); }).catch(() => undefined);
+    Promise.resolve(bot.intro()).then((r) => { last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text }]); }).catch(() => undefined);
   }, [ready, bot, msgs.length]);
   const send = useCallback(async (text: string) => {
     const t = text.trim(); if (!t || busy) return; setQ(''); setBusy(true); setStatus('');
