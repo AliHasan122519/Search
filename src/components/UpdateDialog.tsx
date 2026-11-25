@@ -12,7 +12,8 @@ export function UpdateDialog({ apk, onClose }: { apk: { versionCode: number; url
   useEffect(() => { primary.current?.focus(); const k = (e: KeyboardEvent) => { if (e.key === 'Escape' && phase !== 'downloading') onClose(); }; window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k); }, [phase, onClose]);
   const start = async () => {
     setPhase('downloading'); setPct(0);
-    try { setPhase(await getInstaller().install(apk.url, setPct)); } catch (e) { const m = String((e as any)?.message ?? e); setPhase(/signature_mismatch/.test(m) ? 'signature_mismatch' : /invalid_package/.test(m) ? 'invalid_package' : /not_newer/.test(m) ? 'not_newer' : 'error'); }
+    try { const r = await getInstaller().install(apk.url, setPct); if (r === 'installing') { onClose(); return; } setPhase(r); }   // the download is over and Android's update screen opens: the dialog gets out of the way at once
+     catch (e) { const m = String((e as any)?.message ?? e); setPhase(/signature_mismatch/.test(m) ? 'signature_mismatch' : /invalid_package/.test(m) ? 'invalid_package' : /not_newer/.test(m) ? 'not_newer' : 'error'); }
   };
   const busy = phase === 'downloading';
   return (
