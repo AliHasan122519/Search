@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download } from 'lucide-react';
 import { ThemeToggle } from './components/ThemeToggle';
 import { UpdateDialog } from './components/UpdateDialog';
-import { getAutoUpdater } from './lib/installer';
 import { MenuButton, Drawer } from './components/Drawer';
 import { DreamsPanel } from './components/DreamsPanel';
 import { PeoplePanel } from './components/PeoplePanel';
@@ -26,17 +25,11 @@ export function App() {
   const [attempt, setAttempt] = useState(0);
   const [apkNotice, setApkNotice] = useState<Manifest['apk']>();
   const [dialog, setDialog] = useState(false);          // the «update available» dialog
-  const [staged, setStaged] = useState(0);                // versionCode of an update already downloaded and checked: it installs by itself when the user leaves the app
-  const staging = useRef(0);                              // versionCode being (or already) downloaded in the background
-  /** a newer app exists: download it quietly (no dialog) and let it install when the user leaves; only when that cannot be done (no permission yet, an error, not the Android app) is the dialog shown */
-  const onApk = useCallback(async (n: NonNullable<Manifest['apk']>) => {
+  const shown = useRef(0);                                // versionCode whose dialog was already shown in this run (a «لاحقاً» is not asked again until the next launch)
+  /** a newer app exists: tell the user inside the app; «تحديث الآن» downloads it, checks it and opens Android's installer, the user confirms */
+  const onApk = useCallback((n: NonNullable<Manifest['apk']>) => {
     setApkNotice(n);
-    if (staging.current === n.versionCode) return;
-    const au = getAutoUpdater();
-    if (!au || !(await au.canInstall())) { setDialog(true); return; }
-    staging.current = n.versionCode;
-    try { await au.stage(n.url); setStaged(n.versionCode); setToast('نزل التحديث وسيُثبَّت تلقائياً عند خروجك من التطبيق'); setTimeout(() => setToast(''), 6000); }
-    catch { staging.current = 0; setDialog(true); }
+    if (shown.current !== n.versionCode) { shown.current = n.versionCode; setDialog(true); }
   }, []);
   const [toast, setToast] = useState('');
   const [menu, setMenu] = useState(false);                    // the side menu
@@ -78,7 +71,7 @@ export function App() {
       lastCheck.current = Date.now();
       const r = await checkForUpdate(c.manifest);
       if (dead) return;
-      if (r.apkNotice) void onApk(r.apkNotice);
+      if (r.apkNotice) onApk(r.apkNotice);
       if (r.status === 'updated') { setEngine(new Engine()); setAttempt((a) => a + 1); setToast('تم تحديث المحتوى تلقائياً'); setTimeout(() => setToast(''), 5000); }          // re-index with the new content
     })();
     return () => { dead = true; };
@@ -90,7 +83,7 @@ export function App() {
       if (document.visibilityState !== 'visible' || !content.current || Date.now() - lastCheck.current < 15 * 60 * 1000) return;
       lastCheck.current = Date.now();
       const r = await checkForUpdate(content.current.manifest);
-      if (r.apkNotice) void onApk(r.apkNotice);
+      if (r.apkNotice) onApk(r.apkNotice);
       if (r.status === 'updated') { setEngine(new Engine()); setAttempt((n) => n + 1); setToast('تم تحديث المحتوى تلقائياً'); setTimeout(() => setToast(''), 5000); }
     };
     document.addEventListener('visibilitychange', again);
@@ -113,7 +106,7 @@ export function App() {
           : opened.card === 'library'
           ? <LibraryPanel title={opened.label} sub={opened.sub} docs={lists[opened.id] ?? []} load={loadFile} onClose={() => setPanel(null)} />
           : <DreamsPanel title={opened.label} docs={lists[opened.id] ?? []} onClose={() => setPanel(null)} />)}
-      {apkNotice && <button type="button" className="apk-notice" onClick={() => { if (staged === apkNotice.versionCode) void getAutoUpdater()?.commit().catch(() => setDialog(true)); else setDialog(true); }}><Download size={16} />{staged === apkNotice.versionCode ? 'التحديث جاهز — اضغط للتثبيت الآن' : 'يتوفر إصدار جديد من التطبيق'}</button>}
+      {apkNotice && <button type="button" className="apk-notice" onClick={() => setDialog(true)}><Download size={16} />يتوفر إصدار جديد — اضغط للتحديث</button>}
       {apkNotice && dialog && <UpdateDialog apk={apkNotice} onClose={() => setDialog(false)} />}
       {toast && <div className="toast" role="status">{toast}</div>}
       {home && <AssistantPanel home title={home.label} phrases={lists[home.id] ?? []} lists={lists} engine={engine} load={loadFile} onClose={() => undefined} />}

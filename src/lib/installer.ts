@@ -22,19 +22,3 @@ export function getInstaller(): Installer {
     },
   };
 }
-
-interface StagePlugin { canInstall(): Promise<{ allowed: boolean }>; download(o: { url: string; commitOnLeave: boolean }): Promise<{ status: 'ready' }>; commit(): Promise<{ status: 'installing' | 'needs_permission' }>; addListener(ev: 'progress', cb: (e: { percent: number }) => void): Promise<{ remove: () => Promise<void> }>; }
-
-/** Automatic updates (Android app only; null elsewhere): the new APK is downloaded and checked quietly in the background, then installed the moment the user leaves the app. */
-export interface AutoUpdater { canInstall(): Promise<boolean>; stage(url: string): Promise<void>; commit(): Promise<'installing' | 'needs_permission'>; }
-export function getAutoUpdater(): AutoUpdater | null {
-  const hook = (window as any).__qsAutoUpdater as AutoUpdater | undefined;      // lets tests replace the native part
-  if (hook) return hook;
-  if (!isNative()) return null;
-  const p = registerPlugin<StagePlugin>('ApkInstaller');
-  return {
-    async canInstall() { try { return (await p.canInstall()).allowed; } catch { return false; } },
-    async stage(url) { await p.download({ url, commitOnLeave: true }); },
-    async commit() { return (await p.commit()).status; },
-  };
-}
