@@ -1193,8 +1193,8 @@
   }
  ],
  "apk": {
-  "versionCode": 3,
-  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=3",
-  "notes": "أضفنا التحديث من داخل التطبيق وإغلاق القائمة بالسحب"
+  "versionCode": 4,
+  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=4",
+  "notes": "التحديثات تنزل تلقائياً وتُثبَّت عند خروجك من التطبيق"
  }
 }
