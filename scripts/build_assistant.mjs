@@ -12,6 +12,9 @@ if (process.argv.includes('--check')) { const cur = readFileSync('content/assist
 writeFileSync('content/assistant.json', out);
 const m = JSON.parse(readFileSync('content/manifest.json', 'utf8'));
 const tab = m.tabs.find((t) => t.id === 'assistant');
-tab.sha256 = createHash('sha256').update(out).digest('hex'); tab.count = h.length;
+const sha = createHash('sha256').update(out).digest('hex');
+// installed apps fetch only when the content version rises: a changed phrase list must raise it, or they keep the old one
+if (tab.sha256 !== sha) { m.version += 1; m.updated = new Date().toISOString().replace(/\.\d+Z$/, 'Z'); }
+tab.sha256 = sha; tab.count = h.length;
 writeFileSync('content/manifest.json', JSON.stringify(m, null, 1) + '\n');
 console.log('assistant.json rebuilt:', h.length, 'rows');
