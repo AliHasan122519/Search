@@ -80,6 +80,22 @@ export function pick(ctx: Ctx, cat: string, vars: Record<string, string | number
   return t.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
 }
 
+
+// ---------- the guide: advice on which book to read (by level, field and aim) ----------
+/** a plain request for advice / a recommendation (the words are the normalised ones: no hamza, ة→ه, ى→ي) */
+const ADVICE_STRONG = /انصح|تنصح|نصيح|ترشح|رشح|توصي|اوصي|ترى لي|استشير|استشار|مشور|اقترح|تقترح/;
+const ADVICE_WEAK = /اول كتاب|افضل كتاب|احسن كتاب|اي كتاب (?:اقرا|ابدا|اقرأ|اتعلم|اشتري)|من وين ابدا|من اين ابدا|ابدا (?:ب|من) ?(?:ايش|وش|اي)|(?:ايش|وش) ابدا|كيف اتعلم|كيف ابدا|كيف اتقن|خطه (?:قراءه|تعلم|دراسه)|مسار (?:تعلم|قراءه)|ترتيب (?:القراءه|الكتب)|مرجع اساسي|المرجع الاساسي|مرجع رئيسي|كتاب (?:اساسي|للمبتدي)|للمبتدي|للمبتدين|للمتقدمين/;
+const BOOKISH = /كتاب|كتب|مرجع|مراجع|اقرا|اقراه|اتعلم|تعلم|ابدا|ابتدي|دراسه|ادرس|اطالع|اشتري/;
+const LEVEL_BEGIN = /مبتدي|مبتدا|مبتدئ|مبتديه|جديد|بدايه|من الصفر|ما اعرف|ما عندي خبره|بدون خبره|اول مره|اول ما|ابدا|اتعلم|تعلم|للمبتدي/;
+const LEVEL_MID = /متوسط|خبره بسيطه|خبره قليله|معرفه بسيطه|شويه خبره|اعرف شوي|اعرف شويه|اساسيات|عندي اساس|عندي خلفيه|قرات (?:شوي|شويه)/;
+const LEVEL_ADV = /متقدم|متمكن|متمرس|محترف|خبره كبيره|خبره طويله|خبره واسعه|خبير|اتقن|متعمق|اتعمق|للمتقدمين/;
+const AIM_REF = /مرجع اساسي|المرجع الاساسي|مرجع رئيسي|اعتمد|اساسي|عمده|مرجع اعتمد/;
+const AIM_MEMO = /احفظ|حفظ|نظم|ارجوزه|الفيه|منظوم/;
+const FIELD_DREAM = /تعبير|رؤيا|رويا|حلم|احلام|منام|منامات|تفسير الاحلام/;
+const FIELD_FIRASA = /فراسه|فراسة|ملامح|وجه|وجوه|لغه الجسد|قراءه الناس|شخصيه|طبائع|اخلاق الناس|ملامح الوجه/;
+interface GuideRow { dom: string; level: string; key: string; why: string }
+function parseGuide(rows: string[] = []): GuideRow[] { return rows.flatMap((r) => { const [dom, level, key, ...w] = r.split('|'); return dom && level && key && w.length ? [{ dom, level, key, why: w.join('|') }] : []; }); }
+
 // ---------- the index of a book (BM25 over its paragraphs), built the first time the book is searched ----------
 interface Index { b: BookMeta; t: BookText; post: Map<string, Uint32Array>; len: Uint16Array; avg: number; n: number; }
 const built = new WeakMap<BookText, Index>();
@@ -219,6 +235,8 @@ export class Assistant {
     if (WHO.test(flat)) return this.reply(this.say('who'), [], ['وش تقدر تسوي؟']);
     if (HELP.test(flat)) return this.reply(this.say('help'), [], this.suggestions());
     if (q.toks.every((w) => GREET.has(w) || STOP.has(w) || w.length < 2)) return this.reply(this.say('hello'), [], this.suggestions());
+    // advice on what to read
+    { const g = this.guide(q); if (g) return g; }
     // follow-ups
     if (this.mem && MORE.test(flat)) return this.more();
     if (this.mem && OPEN_FIRST.test(flat) && this.mem.cards[0]) return this.reply(this.say('open_first'), this.mem.cards.slice(0, 1));
@@ -235,6 +253,34 @@ export class Assistant {
     if (!named.length && OFFTOPIC.test(flat) && !dreamWords.test(flat)) return this.reply(this.say('outside') || this.say('nothing', { q: q.raw }), [], this.suggestions());
     if (!named.length) { const d = await this.discuss(q); if (d) return d; }
     return this.search(q, named);
+  }
+
+
+  /** advice on what to read: «بصفتك سراج، إيش تنصحني أول كتاب؟»، «أنا مبتدئ في الفراسة»، «عندي خبرة بسيطة، وش المرجع الأساسي؟» → books picked from the table of the guide (kept in the content), with the reason for each */
+  private guide(q: Q): Reply | null {
+    const f = q.norm; const rows = parseGuide(this.ctx.phrases.guide); if (!rows.length) return null;
+    const strong = ADVICE_STRONG.test(f), weak = ADVICE_WEAK.test(f) || /(?:ايش|وش|اي|شنو)(?: كتاب)? (?:ابدا|ابتدي|اقرا|اقراه|اتعلم)/.test(f) || (LEVEL_ADV.test(f) || LEVEL_MID.test(f) || /مبتدي|مبتدا|مبتدئ/.test(f)) && /(?:ايش|وش|اي|شنو)/.test(f) && /كتاب|كتب|مرجع|اقرا/.test(f); if (!strong && !weak) return null;
+    const bookish = BOOKISH.test(f);
+    // someone telling a dream and asking what to do is not asking for books
+    if (/(?:رايت|شفت|حلمت|حلم لي|راودني)/.test(f) && !bookish) return null;
+    const dream = FIELD_DREAM.test(f), firasa = FIELD_FIRASA.test(f);
+    const aim = AIM_REF.test(f) ? 'مرجع' : AIM_MEMO.test(f) ? 'حفظ' : '';
+    const lvl = LEVEL_ADV.test(f) ? 'متقدم' : LEVEL_MID.test(f) ? 'متوسط' : LEVEL_BEGIN.test(f) ? 'مبتدئ' : '';
+    if (strong && !weak && !bookish && !dream && !firasa && !lvl && !aim) return this.reply(this.say('guide_ask'), [], ['أنا مبتدئ في التعبير', 'عندي خبرة في الفراسة، وش المرجع الأساسي؟']);
+    const doms = dream && !firasa ? ['تعبير'] : firasa && !dream ? ['فراسة'] : ['تعبير', 'فراسة'];
+    const use = aim || lvl || 'مبتدئ'; const label: Record<string, string> = { مبتدئ: 'لمن يبدأ', متوسط: 'لمن عنده أساس', متقدم: 'للمتقدم', مرجع: 'كمرجع أساسي', حفظ: 'للحفظ' };
+    const find = (key: string) => this.ctx.books.find((b) => b.title.includes(key));
+    const cards: Card[] = [];
+    for (const dom of doms) {
+      const take = rows.filter((r) => r.dom === dom && r.level === use); const per = doms.length > 1 ? 2 : 3;
+      for (const r of take) { const b = find(r.key); if (!b || cards.some((c) => c.title === b.title)) continue; if (cards.filter((c) => c.where.startsWith(dom === 'تعبير' ? 'علم التعبير' : 'الفراسة')).length >= per) break; cards.push({ title: b.title, where: `${dom === 'تعبير' ? 'علم التعبير' : 'الفراسة'} · ${label[use]}`, quote: r.why, open: b.textFile ? [{ kind: 'text', book: b.id, para: 0 }] : [] }); }
+    }
+    if (!cards.length) return null;
+    const domText = doms.length === 2 ? 'التعبير والفراسة' : doms[0] === 'تعبير' ? 'علم التعبير' : 'الفراسة';
+    const lvlText = lvl || aim ? label[use] : 'لمن يبدأ (وقل لي مستواك لأعدّل لك الترشيح)';
+    const chips = doms.length === 2 ? ['أنا مبتدئ في التعبير', 'عندي خبرة في الفراسة، وش المرجع الأساسي؟'] : use === 'مبتدئ' ? [`أنا متوسط في ${domText}`] : use === 'متوسط' ? [`أنا متقدم في ${domText}`] : [];
+    this.mem = null;
+    return this.reply(this.say('guide_intro', { dom: domText, lvl: lvlText }), cards, chips, this.say('guide_note'));
   }
 
   private suggestions(): string[] { return ['وش فسّروا رؤية الثعبان؟', 'مين ابن سيرين؟', 'كم صفحة كتاب المرقبة العليا؟', 'دوّر لي فصل الصداقة في كتاب الأخلاق والسير']; }

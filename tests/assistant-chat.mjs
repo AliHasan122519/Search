@@ -31,4 +31,21 @@ await bot.ask('اسمي علي'); const nm = await bot.ask('وش اسمي'); con
 // real questions keep working
 const real = [['وش تفسير الماء في المنام', /./], ['تفسير رؤية الذهب في المنام', /./], ['الماء في المنام', /./], ['وش تفسير الاسد في الحلم', /./], ['مين ابن سيرين', /ابن سيرين|سيرين/], ['كم صفحة كتاب المرقبة العليا', /صفح/], ['السلام عليكم مين ابن سيرين', /وعليكم السلام[\s\S]*سيرين/], ['هلا والله كم صفحة كتاب المرقبة العليا', /هلا|حيّاك|يا هلا[\s\S]*صفح/], ['الجو كيف اليوم', /خارج|مختص|ما أجاوب|ما اقدر/]];
 for (const [t, re] of real) { const r = await bot.ask(t); if (/في (?:المنام|الحلم)/.test(t)) check(r.cards.length > 0, `«${t}» found nothing: ${r.text}`); console.log(`«${t}» → ${r.text.slice(0, 110)}`); check(re.test(r.text), `real «${t}» did not give the expected answer: ${r.text.slice(0, 120)}`); }
+// advice: «بصفتك سراج إيش تنصحني؟» → books from the guide table, by field, level and aim; a dream told with a question is not a request for books
+const advice = [
+  ['بصفتك سراج ايش تنصحني اول كتاب اقراه وانا مبتدئ في علم التعبير', 'المدخل لعلم تعبير'],
+  ['بصفتك مساعد شخصي وش تنصحني اقرا انا مبتدئ في الفراسة', 'لغة الوجوه'],
+  ['عندي خبرة بسيطة في علم الفراسة ايش تنصحني اخذه كمرجع اساسي', 'الفراسة (دليلك'],
+  ['انا متقدم في التعبير وش تنصحني اقرا', 'القادري'],
+  ['انا مبتدئ ايش كتاب ابدا فيه', 'المدخل لعلم تعبير'],
+  ['من وين ابدا في الفراسة', 'لغة الوجوه'],
+  ['ايش تنصحني احفظ من نظم التعبير', 'الألفية الوردية'],
+  ['رشح لي كتاب اتعلم منه التعبير', 'المدخل لعلم تعبير'],
+];
+for (const [t, want] of advice) { const r = await bot.ask(t); console.log(`«${t}» → ${r.cards.map((c) => c.title.slice(0, 28)).join(' | ')}`); check(r.cards.some((c) => c.title.includes(want)), `advice «${t}» did not recommend «${want}»: ${r.text} / ${r.cards.map((c) => c.title)}`); check(!NOT_FOUND.test(r.text), `advice «${t}» got a not-found reply`); }
+{ const r = await bot.ask('ايش تنصحني'); console.log('«ايش تنصحني» →', r.text.slice(0, 90)); check(r.cards.length === 0 && /تعبير|فراسة|الفراسة/.test(r.text), 'a bare «ايش تنصحني» must ask what field and level'); }
+{ const r = await bot.ask('رايت اني اطير في السماء ايش تنصحني'); console.log('dream+advice →', r.text.slice(0, 80)); check(!r.cards.some((c) => /ترشيح|لمن يبدأ|للمتقدم/.test(c.where)), 'a told dream was answered with a reading list'); }
+{ const r = await bot.ask('وش تفسير الثعبان في المنام'); check(r.cards.length > 0 && !/لمن يبدأ|للمتقدم/.test(r.cards[0].where), 'a symbol question was taken for advice'); }
+// no political books are kept
+for (const b of books) check(!/سياسة في علم|السياسة/.test(b.title), `a political book is still in the lists: ${b.title}`);
 console.log(bad ? `\n${bad} failed` : '\nall assistant checks passed'); process.exit(bad ? 1 : 0);

@@ -1,15 +1,15 @@
 {
  "schema": 1,
- "version": 489,
- "updated": "2026-11-25T22:38:49Z",
+ "version": 492,
+ "updated": "2026-11-25T22:44:36Z",
  "tabs": [
   {
    "id": "assistant",
    "label": "سراج",
    "kind": "generic",
    "file": "assistant.json",
-   "sha256": "47f66d49d5a6b15bf0681ee35c1860a401456046abd37343746049dfcf36b237",
-   "count": 212,
+   "sha256": "a3aa3d2f42a7c5ff00d3daa6a5e9e3d01774ff0138d6bcf2bf77d3290ccd389e",
+   "count": 246,
    "drawer": true,
    "card": "assistant",
    "menu": "سراج",
@@ -49,8 +49,8 @@
    "label": "كتب الفراسة",
    "kind": "generic",
    "file": "kutubfiras.json",
-   "sha256": "15bb6953ea03139fadf56639e63969d4f1ef91423560d0f488115b88c9ed77ac",
-   "count": 28,
+   "sha256": "9710a52a5cef00686236f240ec5715db9f05b9bb0452285e6081ea82ff626ae5",
+   "count": 27,
    "drawer": true,
    "card": "library",
    "menu": "كتب الفراسة",
@@ -230,11 +230,6 @@
    "file": "covers/ilm-firasa-hadith.jpg",
    "sha256": "8ba133353b420a10967c3a736c64bc478061d212f7862b1b5333e53602be282a",
    "size": 62358
-  },
-  {
-   "file": "covers/firasa-ansari.jpg",
-   "sha256": "9ae2ba0f896c8c3e8ee03241d04b90010ff815d9703537203d5b591bda47ff32",
-   "size": 20946
   },
   {
    "file": "covers/pers-anmat.jpg",
@@ -525,11 +520,6 @@
    "file": "books/pers-hariri.json",
    "sha256": "c9b56814466653da331e84d7234a3d2925ceacea77e29458f56b772a2f724cda",
    "size": 910830
-  },
-  {
-   "file": "books/firasa-ansari.json",
-   "sha256": "011d71007fff19cf658571d6f2f05bfb3dc375e5a6c63041b74e155a7bc080f7",
-   "size": 192808
   },
   {
    "file": "scans/alfiya-wardiyya/000.jpg",
