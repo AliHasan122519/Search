@@ -5,14 +5,14 @@
  "tabs": [
   {
    "id": "assistant",
-   "label": "المساعد الذكي",
+   "label": "سراج",
    "kind": "generic",
    "file": "assistant.json",
-   "sha256": "69e138b91d10d0fdf07cfe1cc0595a692c9af869b3ec1b959f35d8b674de8f34",
-   "count": 118,
+   "sha256": "1f49affdffe59c8bd2dbb4a7eaeb499a2bb98502fffdd9bcdac1d7cb287fce6c",
+   "count": 197,
    "drawer": true,
    "card": "assistant",
-   "menu": "المساعد الذكي",
+   "menu": "سراج",
    "sub": "اسألني عن أي كتاب أو رمز، وأجاوبك من المراجع اللي في التطبيق بس.",
    "placeholder": "اكتب سؤالك"
   },
@@ -1193,7 +1193,7 @@
   }
  ],
  "apk": {
-  "versionCode": 7,
-  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=7"
+  "versionCode": 8,
+  "url": "https://raw.githubusercontent.com/AliHasan122519/Search/main/apk/almaktaba.apk?v=8"
  }
 }

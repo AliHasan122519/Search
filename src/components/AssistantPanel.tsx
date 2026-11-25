@@ -45,7 +45,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
   useEffect(() => { const t = [0, 90, 300, 700].map((d) => window.setTimeout(settle, d)); const r = requestAnimationFrame(settle); return () => { t.forEach(clearTimeout); cancelAnimationFrame(r); }; }, [msgs, busy, view, settle]);
   useEffect(() => {
     if (!ready || msgs.length) return;
-    bot.ask('هلا').then((r) => { last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text, chips: FIRST }]); }).catch(() => undefined);
+    Promise.resolve(bot.intro()).then((r) => { last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text, chips: FIRST }]); }).catch(() => undefined);
   }, [ready, bot, msgs.length]);
   const send = useCallback(async (text: string) => {
     const t = text.trim(); if (!t || busy) return; setQ(''); setBusy(true); setStatus('');
@@ -62,7 +62,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
     <div ref={back} className={home ? 'as-home' : 'panel-back'} onClick={home ? undefined : onClose}>
       <div className={home ? 'panel as-panel as-home-panel' : 'panel as-panel'} role={home ? 'main' : 'dialog'} aria-modal="true" aria-label={title} style={view ? { height: view.h, transform: `translateY(${view.top}px)` } : undefined} onClick={(e) => e.stopPropagation()}>
         <div className="panel-head">
-          <div><h2>{title}</h2></div>
+          <div><h2>{title}</h2>{home && <p className="panel-sub">المساعد الذكي</p>}</div>
           {!home && <button type="button" className="drawer-x" aria-label="إغلاق" onClick={onClose}><X size={20} aria-hidden="true" /></button>}
         </div>
         <div ref={chat} className="as-chat" role="log" aria-live="polite" aria-label="المحادثة">

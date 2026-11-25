@@ -7,6 +7,7 @@
  */
 import { normalize, tokens, queryStem } from './arabic';
 import { dialectVariants } from './dialect';
+import { smalltalk, type Social } from './chat';
 import type { Doc, Lookup } from './types';
 import { classify, tierOf, gather, matchTopic, parseTopics, TIER_LABEL, TIER_ORDER, searchDocs, type Evidence, type Intent, type Tier, type Topic } from './discuss';
 
@@ -55,7 +56,7 @@ const THANKS = /شكرا|مشكور|يعطيك العافيه|الله يعاف�
 const BYE = /مع السلامه|في امان الله|باي|الى اللقاء|بسلامه|تصبح على خير|الله يحفظك/;
 const WHO = /من انت|مين انت|منو انت|وش انت|ايش انت|وش اسمك|ايش اسمك|شو اسمك|من اي|انت بشر|انت انسان|انت روبوت|انت ذكاء|انت مين|من صنعك|من برمجك/;
 const HELP = /وش تسوي|ايش تسوي|وش تقدر|ايش تقدر|كيف استخدمك|كيف اسالك|مساعده|وش فايدتك|وش شغلتك|وش تعرف|ايش تعرف|وش ممكن اسالك|ايش اسالك|عرفني بنفسك|وش وظيفتك/;
-const OFFTOPIC = /سعر|اسعار|طقس|حاله الجو|درجه الحراره|مباراه|الدوري|نتيجه المباراه|اخبار|رياضه|وصفه طبخ|طبخ|اسهم|الاسهم|عمله|دولار|بيتكوين|وظيفه|ترجم|برمجه|كود|لعبه|فلم|مسلسل|اغنيه|برج|حظك|الابراج/;
+const OFFTOPIC = /الجو|ميسي|رونالدو|كره القدم|كوره|ايفون|سناب|تيك توك|واجب|معادله|رياضيات|كيمياء|فيزياء|سعر|اسعار|طقس|حاله الجو|درجه الحراره|مباراه|الدوري|نتيجه المباراه|اخبار|رياضه|وصفه طبخ|طبخ|اسهم|الاسهم|عمله|دولار|بيتكوين|وظيفه|ترجم|برمجه|كود|لعبه|فلم|مسلسل|اغنيه|برج|حظك|الابراج/;
 const MORE = /^(?:زدني|زيدني|زد|كمل|كمّل|كمله|اكثر|ابغى اكثر|غيره|غيرها|وغيره|وغيرها|بعد|ثاني|ثانيه|الباقي|باقي|وش بعد|والباقي)(?:\s|$)/;
 const NARR_STOP = new Set(('اقول اسوي افعل اذا لو ماذا رايت شفت حلمت رايتني شفتني منام المنام حلم الحلم كاني كانني كان كنت كانت اني انني شفتها رايتها رايته شفته فيه فيها كذا ثم بعد يعني بس لقيت لقيتني حصل صار وش ايش تفسيره تفسيرها يعني ممكن').split(/\s+/).map((w) => normalize(w)));
 const GEN_STOP = new Set(('اشوف اظن اعتقد رايي ارى احس كلها كل الصحيح الواقع لها ليس هناك يوجد حكم يجوز جايز حلال حرام مباح مشروع مشروعيه بدعه يصح ينفع مكروه واجب جائز فرق الفرق مقارنه سبب ليش ليه لماذا هل كيف يكون تكون صحيح خطا غلط صح').split(/\s+/).map((w) => normalize(w)));
@@ -159,7 +160,7 @@ const tocPlace = (b: BookMeta, e: BookMeta['card']['toc'][number]) => `${b.title
 
 // ---------- the answer ----------
 export class Assistant {
-  private mem: Memory | null = null; private texts = new Map<string, Promise<BookText | null>>(); private topics: Topic[];
+  private mem: Memory | null = null; private userName = ''; private texts = new Map<string, Promise<BookText | null>>(); private topics: Topic[];
   constructor(private ctx: Ctx) { this.topics = parseTopics(ctx.phrases.topic ?? []); }
   private text(b: BookMeta): Promise<BookText | null> {
     if (!b.textFile) return Promise.resolve(null); let p = this.texts.get(b.id); if (!p) { p = this.ctx.loadBook(b).catch(() => null); this.texts.set(b.id, p); } return p;
@@ -167,8 +168,31 @@ export class Assistant {
   private reply(text: string, cards: Card[] = [], chips: string[] = [], after = ''): Reply { return { text, cards, chips, ...(after ? { after } : {}) }; }
   private say(cat: string, vars: Record<string, string | number> = {}) { return pick(this.ctx, cat, vars); }
 
-  async ask(raw: string): Promise<Reply> {
-    const ctx = this.ctx; const q = parseQuery(raw.trim());
+  /** the first thing the user sees: سراج says who he is, shortly and kindly */
+  intro(): Reply { return this.reply(this.say('intro') || this.say('hello'), [], []); }
+
+  /** words for a social message: «chat_X» (or «hello» for a greeting, «bye»), the short «pre_X» when another reply follows it */
+  private social(kinds: Social[], name?: string): Reply {
+    const cat = (k: Social, short: boolean) => {
+      if (short && this.ctx.phrases['pre_' + k]?.length) return 'pre_' + k;
+      return k === 'greet' ? 'hello' : k === 'bye' ? 'bye' : k === 'who' ? 'who' : 'chat_' + k;
+    };
+    if (kinds[0] === 'name_ask') return this.reply(this.userName ? this.say('chat_name_ask', { name: this.userName }) : this.say('chat_name_unknown'));
+    if (kinds[0] === 'name_set' && name) this.userName = name;
+    const parts = kinds.map((k, i) => this.say(cat(k, kinds.length > 1 && i === 0), { name: this.userName || name || '' })).filter(Boolean);
+    const chips = kinds.some((k) => k === 'who' || k === 'greet' || k === 'salam' || k === 'howare' || k === 'ack') ? this.suggestions() : [];
+    return this.reply(parts.join(' ') || this.say('hello'), [], chips);
+  }
+
+  async ask(raw: string, social = true): Promise<Reply> {
+    const ctx = this.ctx;
+    // a kind word is answered kindly (a greeting, thanks, a blessing, «جعلني فداك»…); a greeting before a real question is answered first, then the question
+    if (social) {
+      const st = smalltalk(raw);
+      if (st && !st.rest) return this.social(st.intents, st.name);
+      if (st && st.rest) { const pre = this.say(st.intents[0] === 'greet' ? 'pre_greet' : 'pre_' + st.intents[0]); const r = await this.ask(st.rest, false); return pre ? { ...r, text: `${pre} ${r.text}` } : r; }
+    }
+    const q = parseQuery(raw.trim());
     if (!q.norm) return this.reply(this.say('empty'));
     const flat = q.norm;
     // small talk
@@ -190,7 +214,7 @@ export class Assistant {
     // people (the interpreters)
     const who = /^(?:من|مين|منو|وش|ايش)\s+(?:هو\s+|هي\s+)?(.+)$/.exec(flat);
     if (who && ctx.people.length) { const r = this.person(who[1]); if (r) return r; }
-    if (!named.length && OFFTOPIC.test(flat) && !dreamWords.test(flat)) return this.reply(this.say('nothing', { q: q.raw }));
+    if (!named.length && OFFTOPIC.test(flat) && !dreamWords.test(flat)) return this.reply(this.say('outside') || this.say('nothing', { q: q.raw }), [], this.suggestions());
     if (!named.length) { const d = await this.discuss(q); if (d) return d; }
     return this.search(q, named);
   }
@@ -421,7 +445,7 @@ export class Assistant {
     if (wantHadith && ctx.engine?.has('jami')) { try { const lk = ctx.engine.lookup('jami', sym); for (const r of lk.results.slice(0, 3)) cards.push({ title: 'حديث', where: `السنة النبوية${r.doc.grade ? ' — ' + r.doc.grade : ''}`, quote: snippet(r.doc.text, new Set(words.flatMap(keysOf))), open: [] }); } catch { /* none */ } }
     // 2) the full texts of the books of the lists (the named books only when the question names them)
     cards.push(...await this.booksFor(words, q.exp, named.length ? named : ctx.books, named.length ? 6 : 2, 12, !named.length && cards.length > 0));
-    if (!cards.length) { this.mem = null; return this.reply(this.say('nothing', { q: q.raw })); }
+    if (!cards.length) { this.mem = null; const vague = q.toks.length <= 3 && !/[؟?]/.test(q.raw) && !/^(?:وش|ايش|شو|مين|منو|كم|هل|ليش|كيف|وين|متى|لماذا|ماذا)\b/.test(q.norm); return this.reply(vague && this.ctx.phrases.clarify?.length ? this.say('clarify') : this.say('nothing', { q: q.raw }), [], vague ? this.suggestions() : []); }
     const first = cards.slice(0, 4); this.mem = { query: q.raw, cards, shown: first.length };
     if (cards.length === 1) intro = 'found_one';
     const dreamy = isDream && !named.length;
