@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent as RTouchEvent } from 'react';
 import { Menu, X, MoonStar, CloudMoon, Sparkles, BookUser, Scale, GitCompareArrows, ScrollText, Info, ChevronLeft, LibraryBig, Eye, Feather } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { isWebsite, readVisits } from '../lib/visits';
 
 /** a small icon that says what each button of the side menu is (a dream, the prophets and the righteous, the interpreters); a new list falls back to the moon */
 const ICONS: Record<string, LucideIcon> = { ruaa: CloudMoon, anbiya: Sparkles, muabbirun: BookUser, qawaid: Scale, muqaranat: GitCompareArrows, ruyahadith: ScrollText, kutubtabir: LibraryBig, nazm: Feather, kutubfiras: Eye, about: Info };
@@ -28,6 +29,8 @@ export function MenuButton({ open, onClick }: { open: boolean; onClick: () => vo
 export function Drawer({ open, items, onPick, onClose }: { open: boolean; items: DrawerItem[]; onPick: (id: string) => void; onClose: () => void }) {
   const close = useRef<HTMLButtonElement>(null);
   const side = useRef<HTMLElement>(null);
+  const [visits, setVisits] = useState<number | null>(null);
+  useEffect(() => { if (!open || !isWebsite()) return; let dead = false; void readVisits().then((n) => { if (!dead) setVisits(n); }); return () => { dead = true; }; }, [open]);
   const drag = useRef<{ x: number; y: number; dir: 1 | -1; dx: number; live: boolean } | null>(null);
   useEffect(() => {
     if (!open) return;
@@ -74,6 +77,7 @@ export function Drawer({ open, items, onPick, onClose }: { open: boolean; items:
           ))}
           {!items.length && <p className="drawer-empty">لا توجد أقسام الآن.</p>}
         </nav>
+        {visits !== null && <p className="drawer-visits">زوّار المكتبة <strong>{visits.toLocaleString('en-US')}</strong></p>}
       </aside>
     </div>
   );

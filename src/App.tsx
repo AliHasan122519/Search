@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { countVisit } from './lib/visits';
 import { Download } from 'lucide-react';
 import { ThemeToggle } from './components/ThemeToggle';
 import { UpdateDialog } from './components/UpdateDialog';
@@ -37,6 +38,7 @@ export function App() {
   const [lists, setLists] = useState<Record<SourceId, Doc[]>>({});   // the content of the tabs that live in the side menu instead of the tab bar
   const content = useRef<Content | null>(null);
   useEffect(() => { tabNow.current = tab; }, [tab]);
+  useEffect(() => { const t = window.setTimeout(() => { void countVisit(); }, 3000); return () => window.clearTimeout(t); }, []);   // the website counts each device once (the app does not count)
   const loadFile = useCallback((rel: string) => loadContentFile(content.current, rel), []);          // the text of a book of the reader (opened on demand)
   const lastCheck = useRef(Date.now());
 
