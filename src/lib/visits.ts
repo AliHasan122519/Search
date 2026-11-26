@@ -22,7 +22,16 @@ function deviceId(): string | null {
   return getStore(ID) === id || cookie(ID) === id ? id : null;            // a browser that keeps nothing cannot be told apart from a new device on every visit: it is not counted
 }
 
-export async function countVisit(): Promise<void> {
+/** counts a visit only when a person is really there: not an automated browser, and only once the page is on screen (not prerendered or in a background tab) */
+export function countWhenVisible(): () => void {
+  if (!isWebsite() || (navigator as { webdriver?: boolean }).webdriver) return () => undefined;
+  let timer = 0; const run = () => { timer = window.setTimeout(() => { void countVisit(); }, 3000); };
+  const onVis = () => { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', onVis); run(); } };
+  if (document.visibilityState === 'visible') run(); else document.addEventListener('visibilitychange', onVis);
+  return () => { window.clearTimeout(timer); document.removeEventListener('visibilitychange', onVis); };
+}
+
+async function countVisit(): Promise<void> {
   if (!isWebsite()) return;
   if (getStore(DONE) === '1' || cookie(DONE) === '1') return;
   const id = deviceId(); if (!id) return;
@@ -34,5 +43,5 @@ export async function countVisit(): Promise<void> {
 
 export async function readVisits(): Promise<number | null> {
   if (!isWebsite()) return null;
-  try { const r = await fetch('/api/visits'); if (!r.ok) return null; const j = (await r.json()) as { total?: number }; return Number.isFinite(j.total) ? (j.total as number) : null; } catch { return null; }
+  try { const r = await fetch('/api/visits', { cache: 'no-store' }); if (!r.ok) return null; const j = (await r.json()) as { total?: number }; return Number.isFinite(j.total) ? (j.total as number) : null; } catch { return null; }
 }

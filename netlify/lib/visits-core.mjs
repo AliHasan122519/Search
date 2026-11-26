@@ -5,11 +5,15 @@ import { createHash } from 'node:crypto';
 
 export const ID_RE = /^[0-9a-f]{32}$/;
 const sha = (s) => createHash('sha256').update(s).digest('hex');
-/** most new devices one network address may add in a day: a family or an office behind one address passes, a script that invents ids does not */
-export const DAILY_PER_ADDRESS = 40;
+/** most new devices one network address may add in a day: a school, a mosque or an office behind one address passes, a script that invents ids is stopped after a few hundred */
+export const DAILY_PER_ADDRESS = 300;
 
 /** the total lives in 16 small counters (the device's hash picks one), so devices arriving together rarely write the same one; the total is their sum */
 const SHARDS = 16;
+/** crawlers, link previews, monitors and scripts are not visitors: they are never counted */
+export const BOT_RE = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|whatsapp|telegrambot|curl|wget|python|node-fetch|axios|go-http|java\/|okhttp|httpclient|monitor|uptime|pingdom|gtmetrix|phantom|selenium|playwright|puppeteer/i;
+export const isBot = (ua) => !ua || BOT_RE.test(String(ua));
+
 export async function readTotal(store) {
   const parts = await Promise.all(Array.from({ length: SHARDS }, (_, i) => store.get('t/' + i, { type: 'json' }).catch(() => null)));
   return parts.reduce((a, v) => a + (Number.isFinite(v) && v > 0 ? v : 0), 0);
@@ -28,14 +32,14 @@ async function increment(store, shard) {
 }
 
 /** one visit of one device: → { counted, total } */
-export async function visit(store, id, address, day) {
+export async function visit(store, id, address, day, meta = {}) {
   if (!ID_RE.test(String(id))) return { error: 'bad id' };
   const dev = 'd/' + sha('device:' + id).slice(0, 40);
   const ip = 'ip/' + sha('ip:' + address).slice(0, 24) + '/' + day;
   if (await store.get(dev).catch(() => null)) return { counted: false, total: await readTotal(store) };           // already counted: nothing is written
   const used = Number(await store.get(ip).catch(() => 0)) || 0;
   if (used >= DAILY_PER_ADDRESS) return { counted: false, total: await readTotal(store) };
-  const first = await store.set(dev, '1', { onlyIfNew: true });
+  const first = await store.set(dev, JSON.stringify({ t: meta.at || day, k: meta.kind || '?' }), { onlyIfNew: true });   // when it first came and from what kind of screen: so the total can be audited later
   if (!first.modified) return { counted: false, total: await readTotal(store) };                                   // another request of the same device won the race
   const ok = await increment(store, parseInt(dev.slice(2, 4), 16) % SHARDS);
   if (!ok) { await store.delete(dev).catch(() => undefined); return { counted: false, total: await readTotal(store) }; }   // could not add: forget the device so its next visit counts

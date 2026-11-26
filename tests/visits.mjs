@@ -1,5 +1,5 @@
 // node tests/visits.mjs : the visitors counter counts every device once, also when many arrive together
-import { visit, readTotal, DAILY_PER_ADDRESS } from '../netlify/lib/visits-core.mjs';
+import { visit, readTotal, DAILY_PER_ADDRESS, isBot } from '../netlify/lib/visits-core.mjs';
 // an in-memory stand-in for the Netlify Blobs store, with the same conditional writes
 function fakeStore() {
   const m = new Map(); let ver = 0;
@@ -12,6 +12,8 @@ function fakeStore() {
     async delete(k) { m.delete(k); },
   };
 }
+for (const ua of ['Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)', 'WhatsApp/2.23', 'curl/8.4', 'python-requests/2.31', 'HeadlessChrome/120', '', null, 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Playwright/1.4']) if (!isBot(ua)) { console.log('✗ should be a bot:', ua); process.exitCode = 1; }
+for (const ua of ['Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36']) if (isBot(ua)) { console.log('✗ a real browser was taken for a bot:', ua); process.exitCode = 1; }
 let bad = 0; const check = (ok, msg) => { if (!ok) { bad++; console.log('✗', msg); } };
 const hex = (i) => (i.toString(16).padStart(8, '0') + 'a1b2c3d4e5f60718293a4b5c').slice(0, 32);
 const s = fakeStore();
