@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X, Send, BookOpen, Images, Volume2 } from 'lucide-react';
+import { X, Send, BookOpen, Images, Play } from 'lucide-react';
 import type { Doc } from '../lib/types';
 import type { Engine } from '../lib/engine';
 import { parseJson } from '../lib/data';
@@ -12,16 +12,16 @@ import { topmost } from './DreamsPanel';
 
 type Msg = { id: number; who: 'me' | 'bot'; text: string; cards?: Card[]; chips?: string[]; after?: string; promo?: boolean };
 
-/** the short video that introduces the platform (bundled with the app and the site): starts muted so it can play at once, one tap gives it its voice */
+/** the short video that introduces the platform (bundled with the app and the site): it starts with its voice, plays once and stops at the end; where the browser refuses sound before a tap (the site), a play button waits on its poster */
 function PromoVideo() {
   const base = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? './';
-  const ref = useRef<HTMLVideoElement>(null); const [muted, setMuted] = useState(true);
-  useEffect(() => { const v = ref.current; if (v) { v.muted = true; void v.play().catch(() => undefined); } return () => { v?.pause(); }; }, []);
-  const sound = () => { const v = ref.current; if (!v) return; v.muted = false; v.currentTime = 0; setMuted(false); void v.play().catch(() => undefined); };
+  const ref = useRef<HTMLVideoElement>(null); const [blocked, setBlocked] = useState(false);
+  useEffect(() => { const v = ref.current; if (!v) return; v.muted = false; v.loop = false; v.play().then(() => setBlocked(false)).catch(() => setBlocked(true)); return () => { v.pause(); }; }, []);
+  const play = () => { const v = ref.current; if (!v) return; v.muted = false; setBlocked(false); void v.play().catch(() => setBlocked(true)); };
   return (
     <div className="as-video">
-      <video ref={ref} src={`${base}promo/welcome.mp4`} poster={`${base}promo/welcome.jpg`} playsInline controls preload="metadata" aria-label="فيديو تعريفي بالمكتبة الشاملة" />
-      {muted && <button type="button" className="as-video-sound" onClick={sound}><Volume2 size={18} aria-hidden="true" />تشغيل بالصوت</button>}
+      <video ref={ref} src={`${base}promo/welcome.mp4`} poster={`${base}promo/welcome.jpg`} playsInline controls preload="auto" aria-label="فيديو تعريفي بالمكتبة الشاملة" onPlay={() => setBlocked(false)} />
+      {blocked && <button type="button" className="as-video-sound" onClick={play}><Play size={18} aria-hidden="true" />تشغيل الفيديو</button>}
     </div>
   );
 }
