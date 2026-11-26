@@ -13,19 +13,20 @@ import { topmost } from './DreamsPanel';
 type Msg = { id: number; who: 'me' | 'bot'; text: string; cards?: Card[]; chips?: string[]; after?: string; promo?: boolean };
 
 /** the short video that introduces the platform (bundled with the app and the site): it starts with its voice, plays once and stops at the end; where the browser refuses sound before a tap (the site), a play button waits on its poster */
-function PromoVideo() {
+function PromoVideo({ onDone }: { onDone: () => void }) {
   const base = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? './';
-  const ref = useRef<HTMLVideoElement>(null); const [blocked, setBlocked] = useState(false);
+  const ref = useRef<HTMLVideoElement>(null); const [blocked, setBlocked] = useState(false); const [failed, setFailed] = useState(false);
   useEffect(() => { const v = ref.current; if (!v) return; v.muted = false; v.loop = false; v.play().then(() => setBlocked(false)).catch(() => setBlocked(true)); return () => { v.pause(); }; }, []);
   const play = () => { const v = ref.current; if (!v) return; v.muted = false; setBlocked(false); void v.play().catch(() => setBlocked(true)); };
   return (
     <div className="as-video">
-      <video ref={ref} src={`${base}promo/welcome.mp4`} poster={`${base}promo/welcome.jpg`} playsInline controls preload="auto" aria-label="فيديو تعريفي بالمكتبة الشاملة" onPlay={() => setBlocked(false)} />
+      <video ref={ref} src={`${base}promo/welcome.mp4`} poster={`${base}promo/welcome.jpg`} playsInline controls preload="auto" aria-label="فيديو تعريفي بالمكتبة الشاملة" onPlay={() => setBlocked(false)} onEnded={onDone} onError={() => setFailed(true)} />
+      {failed && <p className="as-video-fail" dir="rtl">ما قدرت أشغّل الفيديو هنا. أعد المحاولة بعد قليل.</p>}
       {blocked && <button type="button" className="as-video-sound" onClick={play}><Play size={18} aria-hidden="true" />تشغيل الفيديو</button>}
     </div>
   );
 }
-const PROMO_KEY = 'siraj-promo-seen';
+const PROMO_KEY = 'siraj-promo-done-2';   // set when the video has been watched to its end: until then سراج sends it at every entry
 const seenPromo = () => { try { return localStorage.getItem(PROMO_KEY) === '1'; } catch { return false; } };
 const markPromo = () => { try { localStorage.setItem(PROMO_KEY, '1'); } catch { /* shown again next time */ } };
 
@@ -73,7 +74,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
     Promise.resolve(bot.intro()).then((r) => {
       last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text }]);
       // the first time someone comes in, سراج sends the short video that introduces the platform
-      if (home && !seenPromo()) { markPromo(); setBusy(true); promoT.current = window.setTimeout(() => { const p = bot.promo(); last.current = { id: n.current + 1, who: 'bot' }; setMsgs((m) => [...m, { id: ++n.current, who: 'bot', text: p.text, promo: true }]); setBusy(false); }, 900); }
+      if (home && !seenPromo()) { setBusy(true); promoT.current = window.setTimeout(() => { const p = bot.promo(); last.current = { id: n.current + 1, who: 'bot' }; setMsgs((m) => [...m, { id: ++n.current, who: 'bot', text: p.text, promo: true }]); setBusy(false); }, 900); }
     }).catch(() => undefined);
   }, [ready, bot, msgs.length, home]);
   const promoT = useRef(0); useEffect(() => () => window.clearTimeout(promoT.current), []);
@@ -100,7 +101,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
           {msgs.map((m) => (
             <div key={m.id} data-m={m.id} className={`as-msg as-${m.who}`}>
               <p className="as-text" dir="rtl">{m.text}</p>
-              {m.promo && <PromoVideo />}
+              {m.promo && <PromoVideo onDone={markPromo} />}
               {m.cards?.map((c, i) => (
                 <Fragment key={i}>
                 {c.tier && c.tier !== m.cards![i - 1]?.tier && <h5 className="as-tier">{TIER_LABEL[c.tier]}</h5>}

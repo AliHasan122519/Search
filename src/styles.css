@@ -493,6 +493,7 @@ html[data-theme="dark"] .lib-actions .lib-dl, html[data-theme="dark"] .lib-actio
 .as-bot > .as-text { background: color-mix(in oklch, var(--primary) 9%, var(--card)); color: var(--ink); border: 1px solid var(--border); border-radius: 1rem 1rem 1rem .3rem; padding: .6rem .9rem; margin: 0; line-height: 1.9; }
 .as-video { position: relative; width: min(100%, 17rem); margin: .35rem 0 .1rem; border-radius: 1rem; overflow: hidden; background: #04100c; box-shadow: 0 .6rem 1.6rem rgba(0,0,0,.28); }
 .as-video video { display: block; width: 100%; aspect-ratio: 9 / 16; background: #04100c; }
+.as-video-fail { position: absolute; inset-inline: .8rem; bottom: .8rem; margin: 0; padding: .5rem .7rem; border-radius: .6rem; font-size: .85rem; color: #f8f1de; background: rgba(0,0,0,.65); }
 .as-video-sound { position: absolute; inset-inline: 1.2rem; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; gap: .4rem; border: 0; border-radius: 999px; padding: .55rem .9rem; font: inherit; font-size: .9rem; color: #04100c; background: linear-gradient(90deg, #f6dc9a, #e3b95a); box-shadow: 0 .3rem 1rem rgba(0,0,0,.35); cursor: pointer; }
 .as-card { border: 1px solid var(--border); background: var(--card); border-radius: .8rem; padding: .6rem .8rem; }
 .as-card h4 { margin: 0; font-size: .95rem; color: var(--ink); } .as-where { margin: .1rem 0 .3rem; font-size: .76rem; color: var(--muted-foreground); }
