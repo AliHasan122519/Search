@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { TouchEvent as RTouchEvent } from 'react';
 import { Menu, X, MoonStar, CloudMoon, Sparkles, BookUser, Scale, GitCompareArrows, ScrollText, Info, ChevronLeft, LibraryBig, Eye, Feather } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { isWebsite, readVisits } from '../lib/visits';
+import { countingOn, readVisits } from '../lib/visits';
 
 /** a small icon that says what each button of the side menu is (a dream, the prophets and the righteous, the interpreters); a new list falls back to the moon */
 const ICONS: Record<string, LucideIcon> = { ruaa: CloudMoon, anbiya: Sparkles, muabbirun: BookUser, qawaid: Scale, muqaranat: GitCompareArrows, ruyahadith: ScrollText, kutubtabir: LibraryBig, nazm: Feather, kutubfiras: Eye, about: Info };
@@ -30,7 +30,7 @@ export function Drawer({ open, items, onPick, onClose }: { open: boolean; items:
   const close = useRef<HTMLButtonElement>(null);
   const side = useRef<HTMLElement>(null);
   const [visits, setVisits] = useState<number | null>(null);
-  useEffect(() => { if (!open || !isWebsite()) return; let dead = false; void readVisits().then((n) => { if (!dead) setVisits(n); }); return () => { dead = true; }; }, [open]);
+  useEffect(() => { if (!open || !countingOn()) return; let dead = false; void readVisits().then((n) => { if (!dead) setVisits(n); }); return () => { dead = true; }; }, [open]);
   const drag = useRef<{ x: number; y: number; dir: 1 | -1; dx: number; live: boolean } | null>(null);
   useEffect(() => {
     if (!open) return;

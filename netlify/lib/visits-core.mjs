@@ -39,10 +39,16 @@ export async function visit(store, id, address, day, meta = {}) {
   if (await store.get(dev).catch(() => null)) return { counted: false, total: await readTotal(store) };           // already counted: nothing is written
   const used = Number(await store.get(ip).catch(() => 0)) || 0;
   if (used >= DAILY_PER_ADDRESS) return { counted: false, total: await readTotal(store) };
-  const first = await store.set(dev, JSON.stringify({ t: meta.at || day, k: meta.kind || '?' }), { onlyIfNew: true });   // when it first came and from what kind of screen: so the total can be audited later
+  const first = await store.set(dev, JSON.stringify({ t: meta.at || day, k: meta.kind || '?', s: meta.src || 'web' }), { onlyIfNew: true });   // when it first came from what kind of screen and from the website or the app: so the total can be audited later
   if (!first.modified) return { counted: false, total: await readTotal(store) };                                   // another request of the same device won the race
   const ok = await increment(store, parseInt(dev.slice(2, 4), 16) % SHARDS);
   if (!ok) { await store.delete(dev).catch(() => undefined); return { counted: false, total: await readTotal(store) }; }   // could not add: forget the device so its next visit counts
   await store.set(ip, String(used + 1)).catch(() => undefined);
   return { counted: true, total: await readTotal(store) };
+}
+
+/** the website itself and the app (it runs from https://localhost inside the phone) may call the counter from the browser; nobody else gets a cross-site permission */
+export const ALLOWED_ORIGINS = ['https://almaktaba-alshamila-m2el.netlify.app', 'https://localhost', 'http://localhost', 'capacitor://localhost'];
+export function corsHeaders(origin) {
+  return ALLOWED_ORIGINS.includes(origin) ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type', 'access-control-max-age': '86400', vary: 'origin' } : { vary: 'origin' };
 }

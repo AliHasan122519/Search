@@ -38,7 +38,7 @@ export function App() {
   const [lists, setLists] = useState<Record<SourceId, Doc[]>>({});   // the content of the tabs that live in the side menu instead of the tab bar
   const content = useRef<Content | null>(null);
   useEffect(() => { tabNow.current = tab; }, [tab]);
-  useEffect(() => countWhenVisible(), []);   // the website counts each device once, when a person is really looking at it (the app does not count)
+  useEffect(() => countWhenVisible(), []);   // the website and the app count each device once, when a person is really looking
   const loadFile = useCallback((rel: string) => loadContentFile(content.current, rel), []);          // the text of a book of the reader (opened on demand)
   const lastCheck = useRef(Date.now());
 
