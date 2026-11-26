@@ -46,6 +46,10 @@ for (const [t, want] of advice) { const r = await bot.ask(t); console.log(`«${t
 { const r = await bot.ask('ايش تنصحني'); console.log('«ايش تنصحني» →', r.text.slice(0, 90)); check(r.cards.length === 0 && /تعبير|فراسة|الفراسة/.test(r.text), 'a bare «ايش تنصحني» must ask what field and level'); }
 { const r = await bot.ask('رايت اني اطير في السماء ايش تنصحني'); console.log('dream+advice →', r.text.slice(0, 80)); check(!r.cards.some((c) => /ترشيح|لمن يبدأ|للمتقدم/.test(c.where)), 'a told dream was answered with a reading list'); }
 { const r = await bot.ask('وش تفسير الثعبان في المنام'); check(r.cards.length > 0 && !/لمن يبدأ|للمتقدم/.test(r.cards[0].where), 'a symbol question was taken for advice'); }
+// the introductory video: sent when asked for, and by promo()
+for (const t of ['وريني الاعلان', 'ابغى الفيديو', 'عرفني بالمنصة', 'وش فكرة المكتبة']) { const r = await bot.ask(t); console.log(`«${t}» → promo=${r.promo} ${r.text.slice(0, 60)}`); check(r.promo === true && r.text.length > 5, `«${t}» did not send the introductory video`); }
+check(bot.promo().promo === true && bot.promo().text.length > 5, 'promo() must carry the video');
+for (const t of ['وش تفسير الثعبان في المنام', 'كم صفحة كتاب القادري', 'فهرس كتاب المنامات']) { const r = await bot.ask(t); check(!r.promo, `«${t}» was answered with the video`); }
 // no political books are kept
 for (const b of books) check(!/سياسة في علم|السياسة/.test(b.title), `a political book is still in the lists: ${b.title}`);
 console.log(bad ? `\n${bad} failed` : '\nall assistant checks passed'); process.exit(bad ? 1 : 0);

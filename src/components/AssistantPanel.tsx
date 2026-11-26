@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X, Send, BookOpen, Images } from 'lucide-react';
+import { X, Send, BookOpen, Images, Volume2 } from 'lucide-react';
 import type { Doc } from '../lib/types';
 import type { Engine } from '../lib/engine';
 import { parseJson } from '../lib/data';
@@ -10,7 +10,24 @@ import { BookReader } from './BookReader';
 import { BookEmbed } from './BookEmbed';
 import { topmost } from './DreamsPanel';
 
-type Msg = { id: number; who: 'me' | 'bot'; text: string; cards?: Card[]; chips?: string[]; after?: string };
+type Msg = { id: number; who: 'me' | 'bot'; text: string; cards?: Card[]; chips?: string[]; after?: string; promo?: boolean };
+
+/** the short video that introduces the platform (bundled with the app and the site): starts muted so it can play at once, one tap gives it its voice */
+function PromoVideo() {
+  const base = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? './';
+  const ref = useRef<HTMLVideoElement>(null); const [muted, setMuted] = useState(true);
+  useEffect(() => { const v = ref.current; if (v) { v.muted = true; void v.play().catch(() => undefined); } return () => { v?.pause(); }; }, []);
+  const sound = () => { const v = ref.current; if (!v) return; v.muted = false; v.currentTime = 0; setMuted(false); void v.play().catch(() => undefined); };
+  return (
+    <div className="as-video">
+      <video ref={ref} src={`${base}promo/welcome.mp4`} poster={`${base}promo/welcome.jpg`} playsInline controls preload="metadata" aria-label="فيديو تعريفي بالمكتبة الشاملة" />
+      {muted && <button type="button" className="as-video-sound" onClick={sound}><Volume2 size={18} aria-hidden="true" />تشغيل بالصوت</button>}
+    </div>
+  );
+}
+const PROMO_KEY = 'siraj-promo-seen';
+const seenPromo = () => { try { return localStorage.getItem(PROMO_KEY) === '1'; } catch { return false; } };
+const markPromo = () => { try { localStorage.setItem(PROMO_KEY, '1'); } catch { /* shown again next time */ } };
 
 /** The assistant of the app: a chat that answers only from the references the app holds (see lib/assistant.ts). Every answer shows where it comes from and opens the book at that place. */
 export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClose, home }: { home?: boolean; title: string; sub?: string; phrases: Doc[]; lists: Record<string, Doc[]>; engine: Engine; load: (rel: string) => Promise<ArrayBuffer | null>; onClose: () => void }) {
@@ -53,15 +70,20 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
   useEffect(() => { const t = [0, 90, 300, 700].map((d) => window.setTimeout(settle, d)); const r = requestAnimationFrame(settle); return () => { t.forEach(clearTimeout); cancelAnimationFrame(r); }; }, [msgs, busy, view, settle]);
   useEffect(() => {
     if (!ready || msgs.length) return;
-    Promise.resolve(bot.intro()).then((r) => { last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text }]); }).catch(() => undefined);
-  }, [ready, bot, msgs.length]);
+    Promise.resolve(bot.intro()).then((r) => {
+      last.current = { id: n.current + 1, who: 'bot' }; setMsgs([{ id: ++n.current, who: 'bot', text: r.text }]);
+      // the first time someone comes in, سراج sends the short video that introduces the platform
+      if (home && !seenPromo()) { markPromo(); setBusy(true); promoT.current = window.setTimeout(() => { const p = bot.promo(); last.current = { id: n.current + 1, who: 'bot' }; setMsgs((m) => [...m, { id: ++n.current, who: 'bot', text: p.text, promo: true }]); setBusy(false); }, 900); }
+    }).catch(() => undefined);
+  }, [ready, bot, msgs.length, home]);
+  const promoT = useRef(0); useEffect(() => () => window.clearTimeout(promoT.current), []);
   const send = useCallback(async (text: string) => {
     const t = text.trim(); if (!t || busy) return; setQ(''); setBusy(true); setStatus('');
     last.current = { id: n.current + 1, who: 'me' }; setMsgs((m) => [...m, { id: ++n.current, who: 'me', text: t }]);
     const t0 = Date.now(); let r: Reply;
     try { r = await bot.ask(t); } catch { r = { text: 'صار عندي خلل وأنا أدوّر، جرّب مرة ثانية.', cards: [], chips: [] }; }
     const wait = Math.max(0, 650 - (Date.now() - t0)); if (wait) await new Promise((x) => setTimeout(x, wait));
-    last.current = { id: n.current + 1, who: 'bot' }; setMsgs((m) => [...m, { id: ++n.current, who: 'bot', text: r.text, cards: r.cards, chips: r.chips, after: r.after }]); setBusy(false); setStatus('');
+    last.current = { id: n.current + 1, who: 'bot' }; setMsgs((m) => [...m, { id: ++n.current, who: 'bot', text: r.text, cards: r.cards, chips: r.chips, after: r.after, promo: r.promo }]); setBusy(false); setStatus('');
     if (!document.querySelector('.drawer-back')) input.current?.focus();   // never pops the keyboard up behind the side menu
   }, [bot, busy]);
   const byId = (id: string) => books.find((b) => b.id === id);
@@ -78,6 +100,7 @@ export function AssistantPanel({ title, sub, phrases, lists, engine, load, onClo
           {msgs.map((m) => (
             <div key={m.id} data-m={m.id} className={`as-msg as-${m.who}`}>
               <p className="as-text" dir="rtl">{m.text}</p>
+              {m.promo && <PromoVideo />}
               {m.cards?.map((c, i) => (
                 <Fragment key={i}>
                 {c.tier && c.tier !== m.cards![i - 1]?.tier && <h5 className="as-tier">{TIER_LABEL[c.tier]}</h5>}

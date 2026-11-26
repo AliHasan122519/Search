@@ -35,7 +35,7 @@ export interface BookText { toc: [number, string, number, number?][]; p: string[
 // ---------- what an answer is ----------
 export type Open = { kind: 'text'; book: string; para: number } | { kind: 'scan'; book: string; leaf: number | null };
 export interface Card { title: string; where: string; quote: string; open: Open[]; tier?: Tier; }
-export interface Reply { text: string; cards: Card[]; chips: string[]; after?: string; }
+export interface Reply { text: string; cards: Card[]; chips: string[]; after?: string; /** the short video that introduces the platform is shown with this message */ promo?: boolean; }
 export interface Ctx {
   engine: { lookup(src: string, q: string): Lookup; has(src: string): boolean; docsOf(src: string): Doc[] } | null;
   books: BookMeta[]; people: Doc[]; phrases: Record<string, string[]>; lists?: Record<string, Doc[]>;
@@ -85,6 +85,8 @@ export function pick(ctx: Ctx, cat: string, vars: Record<string, string | number
 /** a plain request for advice / a recommendation (the words are the normalised ones: no hamza, ة→ه, ى→ي) */
 const ADVICE_STRONG = /انصح|تنصح|نصيح|ترشح|رشح|توصي|اوصي|ترى لي|استشير|استشار|مشور|اقترح|تقترح/;
 const ADVICE_WEAK = /اول كتاب|افضل كتاب|احسن كتاب|اي كتاب (?:اقرا|ابدا|اقرأ|اتعلم|اشتري)|من وين ابدا|من اين ابدا|ابدا (?:ب|من) ?(?:ايش|وش|اي)|(?:ايش|وش) ابدا|كيف اتعلم|كيف ابدا|كيف اتقن|خطه (?:قراءه|تعلم|دراسه)|مسار (?:تعلم|قراءه)|ترتيب (?:القراءه|الكتب)|مرجع اساسي|المرجع الاساسي|مرجع رئيسي|كتاب (?:اساسي|للمبتدي)|للمبتدي|للمبتدين|للمتقدمين/;
+/** a request for the introductory video: «وريني الإعلان»، «فيديو»، «عرّفني بالمنصة»، «وش فكرة المكتبة» */
+const PROMO = /(?:^|\s)(?:(?:ال)?اعلان|(?:ال)?فيديو|عرفني (?:ب|على)(?:ال)?(?:منصه|مكتبه)|وش (?:هي|هذي|فكره) (?:ال)?(?:منصه|مكتبه)|وش هدف (?:ال)?(?:منصه|مكتبه))/;
 const BOOKISH = /كتاب|كتب|مرجع|مراجع|اقرا|اقراه|اتعلم|تعلم|ابدا|ابتدي|دراسه|ادرس|اطالع|اشتري/;
 const LEVEL_BEGIN = /مبتدي|مبتدا|مبتدئ|مبتديه|جديد|بدايه|من الصفر|ما اعرف|ما عندي خبره|بدون خبره|اول مره|اول ما|ابدا|اتعلم|تعلم|للمبتدي/;
 const LEVEL_MID = /متوسط|خبره بسيطه|خبره قليله|معرفه بسيطه|شويه خبره|اعرف شوي|اعرف شويه|اساسيات|عندي اساس|عندي خلفيه|قرات (?:شوي|شويه)/;
@@ -203,6 +205,9 @@ export class Assistant {
   /** the first thing the user sees: سراج says who he is, shortly and kindly */
   intro(): Reply { return this.reply(this.say('intro') || this.say('hello'), [], []); }
 
+  /** the short video that introduces the platform: sent by سراج when someone first comes in, and whenever it is asked for */
+  promo(): Reply { return { ...this.reply(this.say('promo_intro') || 'شوف هذا الفيديو:', [], []), promo: true }; }
+
   /** words for a social message: «chat_X» (or «hello» for a greeting, «bye»), the short «pre_X» when another reply follows it */
   private social(kinds: Social[], name?: string): Reply {
     const cat = (k: Social, short: boolean) => {
@@ -232,6 +237,7 @@ export class Assistant {
     // small talk
     if (BYE.test(flat) && q.content.length === 0) return this.reply(this.say('bye'));
     if (THANKS.test(flat) && q.content.length <= 1) return this.reply(this.say('thanks'));
+    if (PROMO.test(flat) && q.toks.length <= 6) return this.promo();
     if (WHO.test(flat)) return this.reply(this.say('who'), [], ['وش تقدر تسوي؟']);
     if (HELP.test(flat)) return this.reply(this.say('help'), [], this.suggestions());
     if (q.toks.every((w) => GREET.has(w) || STOP.has(w) || w.length < 2)) return this.reply(this.say('hello'), [], this.suggestions());
