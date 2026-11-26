@@ -1,4 +1,5 @@
 // /api/visit  (POST {id}): counts the device once.   /api/visits (GET): the total.   Website only: the app never calls it.
+// /api/visit-test and /api/visits-test do the same on a separate test store, so the real total is never touched while the function is checked.
 import { getStore } from '@netlify/blobs';
 import { visit, readTotal } from '../lib/visits-core.mjs';
 
@@ -6,8 +7,8 @@ const json = (body, status = 200, cache = 'no-store') => new Response(JSON.strin
 
 export default async (req, context) => {
   const url = new URL(req.url);
-  // ?dry=1 works on a separate test store, so the real total is never touched while the function is being checked
-  const store = getStore({ name: url.searchParams.get('dry') ? 'visits-dry' : 'visits', consistency: 'strong' });
+  const test = url.pathname.endsWith('-test');
+  const store = getStore({ name: test ? 'visits-test' : 'visits-v2', consistency: 'strong' });
   try {
     if (req.method === 'GET') return json({ total: await readTotal(store) }, 200, 'public, max-age=0');
     if (req.method !== 'POST') return json({ error: 'method' }, 405);
@@ -19,4 +20,4 @@ export default async (req, context) => {
     return json({ error: 'unavailable' }, 503);
   }
 };
-export const config = { path: ['/api/visit', '/api/visits'] };
+export const config = { path: ['/api/visit', '/api/visits', '/api/visit-test', '/api/visits-test'] };
